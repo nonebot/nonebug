@@ -1,0 +1,2 @@
+nonebot-adapter-cqhttp==2.0.0a14
+nonebot2==2.0.0a14
