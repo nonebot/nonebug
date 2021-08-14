@@ -1,0 +1,16 @@
+[template]
+bot_type="cqhttp"
+bot_id="23456666"
+name="template testcase1"
+[template.event]
+name="PrivateMessageEvent"
+self_id="23456666"
+font=0
+post_type="message"
+time=0
+sub_type="friend"
+to_me=true
+message_type="private"
+message_id=0
+
+

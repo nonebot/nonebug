@@ -1,20 +1,23 @@
 from pydantic import BaseModel
 from nonebot.adapters import Bot, Event
-from nonebug.typing import List
+from nonebug.typing import List,Optional
 
 
 class Data(BaseModel):
-    pass
-
+    class Config:
+        extra = "allow"
 
 class Result(BaseModel):
-    pass
-
+    class Config:
+        extra = "allow"
 
 class Api(BaseModel):
     action: str
-    data: Data
+    data: Optional[Data]=None
     result: Result
+    mock : bool = False
+    class Config:
+        extra = "allow"
 
 
 class TestCase(BaseModel):
@@ -24,3 +27,5 @@ class TestCase(BaseModel):
     api_list: List[Api]
     class Config:
         arbitrary_types_allowed = True
+    
+    
