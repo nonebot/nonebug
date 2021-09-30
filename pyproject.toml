@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "nonebot2 test framework"
 authors = ["AkiraXie <l997460364@outlook.com>"]
 license = "MIT"
-
+packages = [{ include = "nonebug" }]
 [tool.poetry.dependencies]
 python = "^3.8"
 nonebot2 = "^2.0.0-alpha.15"
@@ -14,6 +14,11 @@ nonebot-adapter-feishu = "^2.0.0-alpha.15"
 nonebot-adapter-mirai = "^2.0.0-alpha.15"
 
 [tool.poetry.dev-dependencies]
+
+[[tool.poetry.source]]
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple/"
+default = true
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

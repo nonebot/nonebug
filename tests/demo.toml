@@ -1,5 +1,5 @@
 [testcase]
-template="demo_template.toml"
+template="tests/demo_template.toml"
 name="demo testcase0"
 [testcase.event]
 message="123456"
