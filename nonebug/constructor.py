@@ -1,6 +1,7 @@
 import nonebot
 import tomlkit
 import importlib
+import asyncio
 from nonebot.matcher import Matcher
 from nonebot.adapters import Event
 from nonebot.adapters.cqhttp import Bot as CQHTTPBot, MessageSegment, Message, GroupMessageEvent, PrivateMessageEvent
@@ -8,9 +9,8 @@ from nonebot.adapters.cqhttp.event import Sender
 from nonebot.adapters.ding import Bot as DingBot
 from nonebot.adapters.feishu import Bot as FeishuBot
 from nonebot.adapters.mirai import Bot as MiraiBot
-from nonebug.models import TestCase, Api
+from nonebug.models import TestCase
 from nonebug.typing import Union, Optional, List, Type
-from nonebug.models.cqhttp import get_cqhttp_api
 from nonebug.handle import handle_testcase
 
 
@@ -31,7 +31,7 @@ class Constructor:
 
     def set_event(self, event: Event) -> None:
         self.event = event
-
+    
     def set_message(self, message: Union[str, MessageSegment, Message], user_id: int,
                     nickname: str = "test_user", to_me: bool = False,
                     group_id: Optional[int] = None, role: Optional[str] = None,
@@ -62,21 +62,14 @@ class Constructor:
             kwargs['sub_type'] = 'friend'
             kwargs['message_type'] = 'private'
             self.set_event(PrivateMessageEvent.parse_obj(kwargs))
+    
+    def should_call_api(self, action: str, data, result , mock: bool = False) -> None:
+        api = {"action": action, "data": data, "result": result, "mock": mock}
+        self.api_list.append(api
+            )
 
-    def add_api_model(self, api: Api) -> None:
-        self.api_list.append(api)
-
-    def add_api(self, action: str, data: Optional[dict], result: Optional[dict], mock: bool = False) -> None:
-        if isinstance(self.bot, CQHTTPBot):
-            api_type = get_cqhttp_api(action)
-        else:
-            raise NotImplementedError(
-                "add_api is not supported in non-cqhttp adapter, please use add_api_model instead")
-        self.api_list.append(
-            api_type(action=action, data=data, result=result, mock=mock))
-
-    def add_mock_api(self, action: str, result: Optional[dict]) -> None:
-        self.add_api(action, None, result, mock=True)
+    def mock_api(self, action: str, result) -> None:
+        self.should_call_api(action, None, result, mock=True)
 
     @classmethod
     def load_from_toml(cls, path: str, encoding: str = "utf-8") -> 'Constructor':
@@ -121,34 +114,31 @@ class Constructor:
             apidata = api.get("data")
             result = api.get("result")
             mock = api.get("mock", False)
-            self.api_list.append(
-                Api(action=action, data=apidata, result=result, mock=mock))
+            self.should_call_api(action, apidata, result, mock)
         return self
 
-    async def run(self, *, log_output: bool = True, log_name: Optional[str] = None, matchers: Optional[List[Type["Matcher"]]] = None) -> None:
+    def run(self, *, matchers: Optional[List[Type["Matcher"]]] = None) -> None:
         if not self.event or not self.api_list:
             raise ValueError("event and api must be set to test!")
         testcase = TestCase(name=self.name, bot=self.bot,
                             event=self.event, api_list=self.api_list)
-        await handle_testcase(testcase, log_output, log_name, matchers)
+        asyncio.run(handle_testcase(testcase, matchers))
     
     
-    async def test_plugin(self,plugin_name:str, *, log_output: bool = True, log_name: Optional[str] = None):
+    def test_plugin(self,plugin_name:str):
         if not self.event or not self.api_list:
             raise ValueError("event and api must be set to test!")
         testcase = TestCase(name=self.name, bot=self.bot,
                             event=self.event, api_list=self.api_list)
         flag = True
         plugin = nonebot.load_plugin(plugin_name)
-        print(plugin)
         if plugin is None:
             plugin = nonebot.get_plugin(plugin_name)
             flag = False
         if plugin is None:
             raise ValueError(f"{plugin_name} cannot be loaded by nonebot, please check!")
         matchers = list(plugin.matcher)
-        print(matchers,plugin.matcher)
-        await handle_testcase(testcase, log_output, log_name, matchers)
+        asyncio.run(handle_testcase(testcase, matchers))
         if flag: #需要还原plugins
             from nonebot.plugin import plugins
             plugins.pop(plugin_name)

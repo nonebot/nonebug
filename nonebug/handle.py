@@ -1,20 +1,16 @@
 import asyncio
-import os
 from collections import defaultdict
-from datetime import datetime
-from nonebug import get_config
-from nonebug.models import Bot, TestCase
+from nonebug.models  import TestCase
 from nonebug.typing import List, Dict, Type, Optional
-from nonebug.exception import ApiDataAssertException, ApiOutOfBoundException, ApiActionAssertException
+from nonebug.exception import ApiDataAssertException, ApiOutOfBoundException, ApiActionAssertException, ApiTypeAssertException
 from nonebot import escape_tag
-from nonebot.adapters import Event
+from nonebot.adapters import Event,Bot
 from nonebot.exception import NoLogException, IgnoredException, StopPropagation
 from nonebot.matcher import matchers as _matchers
 from nonebot.rule import TrieRule
 from nonebot.matcher import Matcher
 from nonebot.message import _check_matcher, _event_postprocessors, _event_preprocessors
-from nonebot.log import logger, default_filter, default_format
-from nonebot.typing import T_Handler
+from nonebot.log import logger
 
 async def handle_event(bot: "Bot", event: "Event", matchers: Dict[int, List[Type["Matcher"]]]):
     show_log = True
@@ -83,10 +79,7 @@ async def handle_event(bot: "Bot", event: "Event", matchers: Dict[int, List[Type
             )
 
 
-async def handle_testcase(testcase: TestCase, log_output: bool = False,  log_name: Optional[str] = None, matchers: Optional[List[Type[Matcher]]] = None):
-    log_dir = get_config().nonebug_log_dir
-    log_name = log_name or testcase.name + \
-        datetime.now().strftime(" %Y-%m-%d_%H_%M_%S")
+async def handle_testcase(testcase: TestCase, matchers: Optional[List[Type[Matcher]]] = None):
     if not matchers:
         test_matchers = _matchers.copy()
     else:
@@ -95,11 +88,6 @@ async def handle_testcase(testcase: TestCase, log_output: bool = False,  log_nam
             test_matchers[matcher.priority].append(matcher)
     api_list = testcase.api_list
     count = 0
-    if log_output:
-        log_id = logger.add(os.path.join(log_dir, log_name + ".log"), filter=default_filter,
-                        format=default_format, diagnose=False, encoding="utf-8")
-        log_err_id = logger.add(os.path.join(log_dir, log_name + "_err.log"), level="ERROR",
-                            filter=default_filter, format=default_format, encoding="utf-8")
     logger.opt(colors=True).info(
         f"<ly><c>{testcase.name}</c> started testing.</ly>")
 
@@ -111,35 +99,25 @@ async def handle_testcase(testcase: TestCase, log_output: bool = False,  log_nam
         else:
             raise ApiOutOfBoundException
         logger.opt(colors=True).info(f"<y>API <r>{api}</> started testing</>")
-        if api.mock:
+        if api["mock"]:
             logger.opt(colors=True).info(
                 f"<y>API <r>{api}</> is mocked, skip check</>")
-            return api.result.dict()
-        action = api.action
-        if name != action:
-            raise ApiActionAssertException(action, name)
-        api_data = api.data.dict()
+            return api["result"]
+        action = api["action"]
+        assert action == name, ApiActionAssertException(action, name)
+        api_data = api["data"]
         for k, v in kwargs.items():
             expect_v = api_data.get(k)
-            if expect_v == v:
-                continue
-            else:
-                raise ApiDataAssertException(api.action, k, expect_v, v)
+            #assert type(expect_v)==type(v), ApiTypeAssertException(action, k, type(expect_v), type(v))
+            assert expect_v==v, ApiDataAssertException(action,k,expect_v,v)
         logger.opt(colors=True).info(
             f"<y>API <r>{api}</> completed testing</>")
-        return api.result.dict()
+        return api["result"]
 
     testcase.bot.__class__._call_api = _call_api
     await handle_event(testcase.bot, testcase.event, test_matchers)
     logger.opt(colors=True).info(
         f"<ly><c>{testcase.name}</c> completed testing.</ly>")
-    if log_output:
-        logger.remove(log_id)
-        logger.remove(log_err_id)
-        f = open(os.path.join(log_dir, log_name + "_err.log"),"rb")
-        if not f.read():
-            f.close()
-            os.remove(os.path.join(log_dir, log_name + "_err.log"))
 
     
 async def handle_testcases(testcases: List[TestCase]):

@@ -23,11 +23,9 @@ class Api(BaseModel):
         extra = "allow"
 
 
-class TestCase(BaseModel):
-    name: str
-    bot: Bot
-    event: Event
-    api_list: List[Api]
-
-    class Config:
-        arbitrary_types_allowed = True
+class TestCase:
+    def __init__(self,name:str,bot:Bot,event:Event,api_list:List[dict]) -> None:
+        self.name = name
+        self.bot = bot
+        self.event = event
+        self.api_list = api_list

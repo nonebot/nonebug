@@ -7,11 +7,6 @@ user_id=12345
 raw_message="123456"
 sender={nickname="test",user_id=12345}
 [[testcase.api]]
-action="send_msg"
-data={}
-result={message_id=11111}
-mock=true
-[[testcase.api]]
 action="send_group_msg"
 data={group_id=1234,message="1234"}
 result={message_id=11211}
