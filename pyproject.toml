@@ -7,11 +7,8 @@ license = "MIT"
 packages = [{ include = "nonebug" }]
 [tool.poetry.dependencies]
 python = "^3.8"
-nonebot2 = "^2.0.0-alpha.15"
-nonebot-adapter-cqhttp = "^2.0.0-alpha.15"
-nonebot-adapter-ding = "^2.0.0-alpha.15"
-nonebot-adapter-feishu = "^2.0.0-alpha.15"
-nonebot-adapter-mirai = "^2.0.0-alpha.15"
+nonebot2 = "^2.0.0-alpha.16"
+nonebot-adapter-cqhttp = "^2.0.0-alpha.16"
 
 [tool.poetry.dev-dependencies]
 
