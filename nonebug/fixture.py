@@ -1,8 +1,9 @@
-from typing import Generator, AsyncGenerator
+from typing import Generator
 
 import pytest
 
 from nonebug.app import App
+from nonebug.processor.fixture import *
 from nonebug.helpers import clear_nonebot
 
 

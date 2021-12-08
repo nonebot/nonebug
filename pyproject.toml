@@ -24,7 +24,7 @@ black = "^21.11b1"
 nonebot2 = { path = "../nonebot2", develop = true }
 
 [tool.poetry.plugins.pytest11]
-nonebug = "nonebug"
+nonebug = "nonebug.fixture"
 
 # [[tool.poetry.source]]
 # name = "aliyun"
