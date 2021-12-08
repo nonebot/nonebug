@@ -1,11 +1,9 @@
-from typing import Generic, TypeVar, Optional
-
-T = TypeVar("T", bound="BaseApp")
+from typing import Optional
 
 
-class Context(Generic[T]):
-    def __init__(self, app: T):
-        self.app: T = app
+class Context:
+    def __init__(self, app: "BaseApp", *args, **kwargs):
+        self.app = app
         if self.app.context is not None:
             raise RuntimeError("Another test context is actived")
         self.app.context = self
@@ -17,7 +15,7 @@ class Context(Generic[T]):
         await self.run()
 
     async def run_test(self):
-        raise NotImplementedError
+        pass
 
     async def run(self) -> None:
         try:

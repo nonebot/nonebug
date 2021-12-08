@@ -42,34 +42,42 @@ def make_fake_event(**fields) -> Type["Event"]:
     return FakeEvent
 
 
-def test_should_call_api(processor_app: App):
-    api = processor_app.should_call_api("test", {"data": "data"}, "result")
-    queue = processor_app.wait_list
-    assert not queue.empty()
-    assert api == queue.get()
-    assert (
-        api.name == "test" and api.data == {"data": "data"} and api.result == "result"
-    )
+@pytest.mark.asyncio
+async def test_should_call_api(processor_app: App):
+    async with processor_app.test_api() as ctx:
+        api = ctx.should_call_api("test", {"data": "data"}, "result")
+        queue = ctx.wait_list
+        assert not queue.empty()
+        assert api == queue.get()
+        assert (
+            api.name == "test"
+            and api.data == {"data": "data"}
+            and api.result == "result"
+        )
 
 
-def test_should_call_send(processor_app: App):
+@pytest.mark.asyncio
+async def test_should_call_send(processor_app: App):
     event = make_fake_event()()
-    send = processor_app.should_call_send(event, "test message", "result")
-    queue = processor_app.wait_list
-    assert not queue.empty()
-    assert send == queue.get()
-    assert (
-        send.event is event
-        and send.message == "test message"
-        and send.result == "result"
-    )
+    async with processor_app.test_api() as ctx:
+        send = ctx.should_call_send(event, "test message", "result")
+        queue = ctx.wait_list
+        assert not queue.empty()
+        assert send == queue.get()
+        assert (
+            send.event is event
+            and send.message == "test message"
+            and send.result == "result"
+        )
 
 
-def test_got_call_api(processor_app: App):
-    api = processor_app.should_call_api("test", {"data": "data"}, "result")
-    result = processor_app.got_call_api("test", {"data": "data"})
-    assert processor_app.wait_list.empty()
-    assert result == "result"
+@pytest.mark.asyncio
+async def test_got_call_api(processor_app: App):
+    async with processor_app.test_api() as ctx:
+        api = ctx.should_call_api("test", {"data": "data"}, "result")
+        result = ctx.got_call_api("test", {"data": "data"})
+        assert ctx.wait_list.empty()
+        assert result == "result"
 
 
 @pytest.mark.asyncio
@@ -110,8 +118,8 @@ async def test_handler(app: App):
         assert False, "handler should be skipped"
 
     try:
-        async with app.test_handler(_handle_return):
-            app.should_return(False)
+        async with app.test_handler(_handle_return) as ctx:
+            ctx.should_return(False)
     except AssertionError as e:
         pass
     else:
