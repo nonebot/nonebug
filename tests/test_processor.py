@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Type
 import pytest
 from pydantic import create_model
 
-from nonebug.processor import App
+from nonebug import ProcessorApp
 
 if TYPE_CHECKING:
     from nonebot.adapters import Event
@@ -43,7 +43,7 @@ def make_fake_event(**fields) -> Type["Event"]:
 
 
 @pytest.mark.asyncio
-async def test_should_call_api(processor_app: App):
+async def test_should_call_api(processor_app: ProcessorApp):
     async with processor_app.test_api() as ctx:
         api = ctx.should_call_api("test", {"data": "data"}, "result")
         queue = ctx.wait_list
@@ -57,7 +57,7 @@ async def test_should_call_api(processor_app: App):
 
 
 @pytest.mark.asyncio
-async def test_should_call_send(processor_app: App):
+async def test_should_call_send(processor_app: ProcessorApp):
     event = make_fake_event()()
     async with processor_app.test_api() as ctx:
         send = ctx.should_call_send(event, "test message", "result")
@@ -72,7 +72,7 @@ async def test_should_call_send(processor_app: App):
 
 
 @pytest.mark.asyncio
-async def test_got_call_api(processor_app: App):
+async def test_got_call_api(processor_app: ProcessorApp):
     async with processor_app.test_api() as ctx:
         api = ctx.should_call_api("test", {"data": "data"}, "result")
         result = ctx.got_call_api("test", {"data": "data"})
@@ -81,7 +81,7 @@ async def test_got_call_api(processor_app: App):
 
 
 @pytest.mark.asyncio
-async def test_handler(app: App):
+async def test_handler(app: ProcessorApp):
     from nonebot.adapters import Event
     from nonebot.params import EventParam
     from nonebot.exception import SkippedException

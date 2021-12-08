@@ -2,8 +2,7 @@ from typing import Generator
 
 import pytest
 
-from nonebug.app import App
-from nonebug.processor.fixture import *
+from nonebug.app import App, ProcessorApp
 from nonebug.helpers import clear_nonebot
 
 
@@ -39,8 +38,15 @@ def nonebug_app(nonebug_init: None) -> App:
     Get a test app provided by nonebug.
     Use app to define test cases and run them.
     """
-    app = App()
-    return app
+    return App()
+
+
+@pytest.fixture
+def processor_app(nonebug_init: None) -> ProcessorApp:
+    """
+    Call `nonebug_init` and return a new instance of Processor Test App.
+    """
+    return ProcessorApp()
 
 
 __all__ = ["nonebug_clear", "nonebug_init", "nonebug_app"]
