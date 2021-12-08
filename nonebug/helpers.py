@@ -8,6 +8,11 @@ if TYPE_CHECKING:
 def clear_matchers() -> None:
     from nonebot.matcher import matchers
 
+    for priority in matchers:
+        for matcher in matchers[priority]:
+            if not matcher.module_name:
+                continue
+            clear_module_with_prefix(matcher.module_name)
     matchers.clear()
 
 
@@ -16,11 +21,13 @@ def clear_plugin(plugin: "Plugin") -> None:
 
 
 def clear_plugins() -> None:
+    from nonebot.plugin import _managers
     from nonebot.plugin.plugin import plugins
 
     for plugin in plugins.values():
         clear_plugin(plugin)
     plugins.clear()
+    _managers.clear()
 
 
 def clear_logger() -> None:
