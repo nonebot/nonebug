@@ -22,3 +22,4 @@ class Send(Model):
     event: "Event"
     message: Union[str, "Message", "MessageSegment"]
     kwargs: Dict[str, Any]
+    result: Any

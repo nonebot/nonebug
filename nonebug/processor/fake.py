@@ -16,9 +16,14 @@ def make_fake_classes():
             super(FakeAdapter, self).__init__(driver, **kwargs)
             self.app = app
 
+        @classmethod
         @overrides(Adapter)
-        def _call_api(self, api: str, **data) -> Any:
-            return self.app.got_call_api(api, **data)
+        def get_name(cls) -> str:
+            return "fake"
+
+        @overrides(Adapter)
+        async def _call_api(self, api: str, **data) -> Any:
+            return await self.app.got_call_api(api, **data)
 
     class FakeBot(Bot):
         adapter: FakeAdapter
@@ -34,6 +39,6 @@ def make_fake_classes():
             message: Union[str, "Message", "MessageSegment"],
             **kwargs,
         ) -> Any:
-            return self.app.got_call_send(event, message, **kwargs)
+            return await self.app.got_call_send(event, message, **kwargs)
 
     return FakeAdapter, FakeBot

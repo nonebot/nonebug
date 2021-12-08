@@ -1,7 +1,8 @@
-from typing import Generator
+from typing import Generator, AsyncGenerator
 
 import pytest
 
+from nonebug.app import App
 from nonebug.helpers import clear_nonebot
 
 
@@ -31,4 +32,14 @@ def nonebug_init(nonebug_clear: None) -> None:
     nonebot.init()
 
 
-__all__ = ["nonebug_clear", "nonebug_init"]
+@pytest.fixture(name="app")
+def nonebug_app(nonebug_init: None) -> App:
+    """
+    Get a test app provided by nonebug.
+    Use app to define test cases and run them.
+    """
+    app = App()
+    return app
+
+
+__all__ = ["nonebug_clear", "nonebug_init", "nonebug_app"]

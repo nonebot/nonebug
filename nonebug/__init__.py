@@ -1,3 +1,3 @@
-from .fixture import *
-from .processor.fixture import *
-from .processor import App as ProcessorApp
+from nonebug.app import App
+from nonebug.fixture import *
+from nonebug.processor.fixture import *
