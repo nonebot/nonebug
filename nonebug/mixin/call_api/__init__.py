@@ -1,18 +1,36 @@
 from queue import Queue
-from typing import TYPE_CHECKING, Any, Dict, Union
+from typing import TYPE_CHECKING, Any, Dict, Type, Union, Optional
 
 from nonebug.base import BaseApp, Context
 
 from .model import Api, Send, Model
+from .fake import make_fake_bot, make_fake_adapter
 
 if TYPE_CHECKING:
-    from nonebot.adapters import Event, Message, MessageSegment
+    from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
 
 
 class ApiContext(Context):
     def __init__(self, app: BaseApp, *args, **kwargs):
         super().__init__(app, *args, **kwargs)
         self.wait_list: Queue[Model] = Queue()
+
+    def create_adapter(self, *, base: Optional[Type["Adapter"]] = None) -> "Adapter":
+        from nonebot import get_driver
+
+        return make_fake_adapter(base=base)(get_driver(), self)
+
+    def create_bot(
+        self,
+        *,
+        base: Optional[Type["Bot"]] = None,
+        adapter: Optional["Adapter"] = None,
+        self_id: str = "test",
+    ) -> "Bot":
+        from nonebot import get_driver
+
+        adapter = adapter or make_fake_adapter()(get_driver(), self)
+        return make_fake_bot(base=base)(adapter, self_id)
 
     def should_call_api(self, api: str, data: Dict[str, Any], result: Any) -> Api:
         model = Api(name=api, data=data, result=result)

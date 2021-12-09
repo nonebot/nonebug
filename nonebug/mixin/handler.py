@@ -8,7 +8,7 @@ from .call_api import ApiContext
 if TYPE_CHECKING:
     from nonebot.handler import Handler
     from nonebot.typing import T_Handler
-    from nonebot.dependencies import Param
+    from nonebot.dependencies import Param, DependsWrapper
 
 
 @final
@@ -17,13 +17,15 @@ class HandlerContext(ApiContext):
         self,
         app: "HandlerMixin",
         handler: "Handler",
-        kwargs: Dict[str, Any],
         *args,
-        **_kwargs,
+        **kwargs,
     ):
-        super(HandlerContext, self).__init__(app, *args, **_kwargs)
+        super(HandlerContext, self).__init__(app, *args, **kwargs)
         self.handler = handler
-        self.kwargs = kwargs
+        self.kwargs: Dict[str, Any] = {}
+
+    def pass_params(self, **kwargs: Any) -> None:
+        self.kwargs.update(kwargs)
 
     def should_return(self, result: Any) -> None:
         self.result = result
@@ -41,11 +43,13 @@ class HandlerMixin(BaseApp):
         self,
         handler: Union["Handler", "T_Handler"],
         allow_types: Optional[List[Type["Param"]]] = None,
-        **kwargs,
+        dependencies: Optional[List["DependsWrapper"]] = None,
     ) -> HandlerContext:
         from nonebot.handler import Handler
 
         if not isinstance(handler, Handler):
-            handler = Handler(handler, allow_types=allow_types)
+            handler = Handler(
+                handler, allow_types=allow_types, dependencies=dependencies
+            )
 
-        return HandlerContext(self, handler, kwargs)
+        return HandlerContext(self, handler)
