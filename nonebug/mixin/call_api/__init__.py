@@ -48,7 +48,7 @@ class ApiContext(Context):
         self.wait_list.put(model)
         return model
 
-    def got_call_api(self, api: str, data: Dict[str, Any]) -> Any:
+    def got_call_api(self, api: str, **data: Any) -> Any:
         assert (
             not self.wait_list.empty()
         ), f"Application has no api call but expected api={api} data={data}"

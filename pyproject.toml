@@ -22,6 +22,7 @@ pytest-order = "^1.0.0"
 isort = "^5.10.1"
 black = "^21.11b1"
 nonebot2 = { path = "../nonebot2", develop = true }
+pytest-cov = "^3.0.0"
 
 [tool.poetry.plugins.pytest11]
 nonebug = "nonebug.fixture"
@@ -30,6 +31,9 @@ nonebug = "nonebug.fixture"
 # name = "aliyun"
 # url = "https://mirrors.aliyun.com/pypi/simple/"
 # default = true
+
+[tool.pytest.ini_options]
+addopts = "--cov=nonebug -p no:nonebug"
 
 [tool.black]
 line-length = 88

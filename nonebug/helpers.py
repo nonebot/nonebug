@@ -10,7 +10,7 @@ def clear_matchers() -> None:
 
     for priority in matchers:
         for matcher in matchers[priority]:
-            if not matcher.module_name:
+            if not matcher.module_name:  # pragma: no cover
                 continue
             clear_module_with_prefix(matcher.module_name)
     matchers.clear()

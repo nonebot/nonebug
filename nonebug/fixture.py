@@ -49,4 +49,4 @@ def processor_app(nonebug_init: None) -> ProcessorApp:
     return ProcessorApp()
 
 
-__all__ = ["nonebug_clear", "nonebug_init", "nonebug_app"]
+__all__ = ["nonebug_clear", "nonebug_init", "nonebug_app", "processor_app"]
