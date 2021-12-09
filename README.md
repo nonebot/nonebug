@@ -1,11 +1,17 @@
+<!-- markdownlint-disable MD033 MD041 -->
+
 <p align="center">
-  <a href="https://v2.nonebot.dev/"><img src="https://raw.githubusercontent.com/nonebot/adapter-onebot/master/website/static/img/logo.png" width="500" height="200" alt="nonebot-adapter-onebot"></a>
+  <a href="https://v2.nonebot.dev/"><img src="https://v2.nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
 </p>
 
 <div align="center">
 
-# NoneBot-Adapter-OneBot
+# NoneBug
 
-_✨ OneBot 协议适配 ✨_
+<!-- markdownlint-disable MD036 -->
+
+_✨ NoneBot2 测试框架 ✨_
+
+<!-- markdownlint-enable MD036 -->
 
 </div>
