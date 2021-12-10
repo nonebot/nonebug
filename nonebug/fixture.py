@@ -19,7 +19,7 @@ def nonebug_clear() -> Generator[None, None, None]:
 
 
 @pytest.fixture
-def nonebug_init(nonebug_clear: None) -> None:
+def nonebug_init(nonebug_clear: None, request) -> None:
     """
     Initialize nonebot before test case running.
     And clear nonebot after test case running completed.
@@ -29,7 +29,7 @@ def nonebug_init(nonebug_clear: None) -> None:
 
     import nonebot
 
-    nonebot.init()
+    nonebot.init(**getattr(request, "param", {}))
 
 
 @pytest.fixture(name="app")
