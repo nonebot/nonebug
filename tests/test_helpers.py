@@ -1,14 +1,14 @@
 import sys
 
 import pytest
+from utils import load_plugin
 
 from nonebug.fixture import *
+from nonebug.helpers import clear_nonebot, clear_plugins
 
 
 def test_clear_nonebot():
     import nonebot
-
-    from nonebug.helpers import clear_nonebot
 
     nonebot.init()
 
@@ -19,8 +19,6 @@ def test_clear_nonebot():
 
 def test_clear_builtin_plugins():
     import nonebot
-
-    from nonebug.helpers import clear_nonebot, clear_plugins
 
     nonebot.init()
     nonebot.load_builtin_plugins("echo")
@@ -33,6 +31,14 @@ def test_clear_builtin_plugins():
     assert "nonebot.plugins.echo" not in sys.modules
 
     clear_nonebot()
+
+
+def test_clear_user_plugins(load_plugin):
+    assert "tests.plugins.process" in sys.modules
+
+    clear_nonebot()
+
+    assert "tests.plugins.process" not in sys.modules
 
 
 def test_clear_fixture(nonebug_clear: None):

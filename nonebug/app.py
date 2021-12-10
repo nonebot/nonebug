@@ -1,7 +1,7 @@
-from .mixin import CallApiMixin, HandlerMixin
+from .mixin import CallApiMixin, HandlerMixin, ProcessMixin
 
 
-class ProcessorApp(HandlerMixin, CallApiMixin):
+class ProcessorApp(HandlerMixin, CallApiMixin, ProcessMixin):
     ...
 
 
