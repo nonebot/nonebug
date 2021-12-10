@@ -312,7 +312,7 @@ description = "An asynchronous python bot framework."
 category = "main"
 optional = false
 python-versions = "^3.7.3"
-develop = true
+develop = false
 
 [package.dependencies]
 fastapi = "^0.70.0"
@@ -331,8 +331,10 @@ aiohttp = ["aiohttp[speedups] (>=3.7.4,<4.0.0)"]
 all = ["Quart (>=0.15.0,<0.16.0)", "aiohttp[speedups] (>=3.7.4,<4.0.0)"]
 
 [package.source]
-type = "directory"
-url = "../nonebot2"
+type = "git"
+url = "https://github.com/nonebot/nonebot2.git"
+reference = "dev"
+resolved_reference = "a0d13822c01adf24573a354afb36bc494758ac49"
 
 [[package]]
 name = "packaging"
@@ -660,7 +662,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.3"
-content-hash = "372e56e8f6fad365ad07799cf696b4a014574670b644df6fe3c5f0e958611cb6"
+content-hash = "1970c2ad1bf38638c820570e278bb6bcfe14c29346f51c4a768b906f0cdf357a"
 
 [metadata.files]
 anyio = [
