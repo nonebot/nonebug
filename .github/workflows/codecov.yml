@@ -1,0 +1,31 @@
+name: Code Coverage
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run Pytest and Upload Coverage
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python environment
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+          architecture: "x64"
+
+      - uses: Gr1N/setup-poetry@v4
+
+      - name: Install dependencies
+        run: |
+          poetry install
+          poetry run pytest --cov-report xml --cov-report term-missing
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.xml
+          flags: unittests
