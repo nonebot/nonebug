@@ -31,3 +31,23 @@ class Rejected(Model):
 @dataclass
 class Finished(Model):
     ...
+
+
+@dataclass
+class RulePass(Model):
+    ...
+
+
+@dataclass
+class RuleNotPass(Model):
+    ...
+
+
+@dataclass
+class PermissionPass(Model):
+    ...
+
+
+@dataclass
+class PermissionNotPass(Model):
+    ...

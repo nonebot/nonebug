@@ -1,4 +1,5 @@
 from nonebot import on_message
+from nonebot.permission import Permission
 
 test = on_message()
 
@@ -35,3 +36,23 @@ test_finish = on_message()
 @test_finish.handle()
 async def _():
     await test_finish.finish("message")
+
+
+test_rule_permission_pass = on_message(
+    rule=lambda: True, permission=Permission(lambda: True)
+)
+
+
+@test_rule_permission_pass.handle()
+async def _():
+    pass
+
+
+test_rule_permission_not_pass = on_message(
+    rule=lambda: False, permission=Permission(lambda: False)
+)
+
+
+@test_rule_permission_not_pass.handle()
+async def _():
+    pass

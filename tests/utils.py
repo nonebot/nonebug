@@ -18,7 +18,7 @@ def make_fake_event(**fields) -> Type["Event"]:
 
     class FakeEvent(_Fake):
         def get_type(self) -> str:
-            return "test"
+            return "message"
 
         def get_event_name(self) -> str:
             return "test"
