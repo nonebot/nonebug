@@ -14,9 +14,9 @@ classifiers = ["Framework :: Pytest"]
 [tool.poetry.dependencies]
 python = "^3.7.3"
 pytest = "^6.2.5"
-nonebot2 = "^2.0.0-alpha.14"
-pytest-asyncio = "^0.16.0"
 pytest-order = "^1.0.0"
+pytest-asyncio = "^0.16.0"
+nonebot2 = "^2.0.0-beta.1"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
