@@ -129,6 +129,7 @@ class MatcherContext(ApiContext):
                         event=receive_event.event,
                         state=receive_event.state,
                         stack=stack,
+                        dependency_cache=dependency_cache,
                     )
                 except PausedException:
                     handler = current_handler.get()
