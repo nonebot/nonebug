@@ -6,7 +6,7 @@ from nonebug import ProcessorApp
 
 
 @pytest.mark.asyncio
-async def test_handler(app: "ProcessorApp"):
+async def test_dependent(app: "ProcessorApp"):
     from nonebot.adapters import Event
     from nonebot.params import EventParam
     from nonebot.exception import SkippedException
@@ -23,14 +23,14 @@ async def test_handler(app: "ProcessorApp"):
     def _handle_return():
         return True
 
-    async with app.test_handler(_handle, allow_types=[EventParam]) as ctx:
+    async with app.test_dependent(_handle, allow_types=[EventParam]) as ctx:
         ctx.pass_params(event=FakeEvent())
-    async with app.test_handler(_handle_fake, allow_types=[EventParam]) as ctx:
+    async with app.test_dependent(_handle_fake, allow_types=[EventParam]) as ctx:
         ctx.pass_params(event=FakeEvent())
 
     event = FakeEvent2()
     try:
-        async with app.test_handler(_handle_fake, allow_types=[EventParam]) as ctx:
+        async with app.test_dependent(_handle_fake, allow_types=[EventParam]) as ctx:
             ctx.pass_params(event=event)
     except SkippedException as e:
         assert e.param.name == "event"
@@ -39,7 +39,7 @@ async def test_handler(app: "ProcessorApp"):
         assert False, "handler should be skipped"
 
     try:
-        async with app.test_handler(_handle_return) as ctx:
+        async with app.test_dependent(_handle_return) as ctx:
             ctx.should_return(False)
     except AssertionError as e:
         pass
