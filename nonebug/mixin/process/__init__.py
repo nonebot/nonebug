@@ -17,9 +17,10 @@ from .model import (
 )
 
 if TYPE_CHECKING:
+    from nonebot.typing import T_State
     from nonebot.matcher import Matcher
+    from nonebot.utils import CacheDict
     from nonebot.adapters import Bot, Event
-    from nonebot.typing import T_State, T_DependencyCache
 
 
 class MatcherContext(ApiContext):
@@ -80,7 +81,7 @@ class MatcherContext(ApiContext):
         )
 
         stack = AsyncExitStack()
-        dependency_cache: T_DependencyCache = {}
+        dependency_cache = CacheDict()
         async with stack:
             while self.action_list:
                 # fake event received
