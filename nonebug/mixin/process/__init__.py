@@ -19,7 +19,6 @@ from .model import (
 if TYPE_CHECKING:
     from nonebot.typing import T_State
     from nonebot.matcher import Matcher
-    from nonebot.utils import CacheDict
     from nonebot.adapters import Bot, Event
 
 
@@ -73,6 +72,7 @@ class MatcherContext(ApiContext):
         return finished
 
     async def run_test(self):
+        from nonebot.utils import CacheDict
         from nonebot.matcher import current_handler
         from nonebot.exception import (
             PausedException,
