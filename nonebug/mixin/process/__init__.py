@@ -131,6 +131,7 @@ class MatcherContext(ApiContext):
                     dependency_cache=dependency_cache,
                 )
             except PausedException:
+                dependency_cache.clear()
                 handler = current_handler.get()
                 if not self.action_list or isinstance(
                     self.action_list[0], ReceiveEvent
@@ -147,6 +148,7 @@ class MatcherContext(ApiContext):
                     bot=receive_event.bot, event=receive_event.event
                 )
             except RejectedException:
+                dependency_cache.clear()
                 handler = current_handler.get()
                 self.matcher.handlers.insert(0, handler)
                 if not self.action_list or isinstance(
