@@ -41,7 +41,7 @@ class DependentContext(ApiContext):
     async def run_test(self):
         stack = AsyncExitStack()
         async with stack:
-            result = await self.dependent(_stack=stack, **self.kwargs)
+            result = await self.dependent(stack=stack, **self.kwargs)
             if hasattr(self, "result"):
                 assert result == self.result, "Handler return value mismatch"
 
