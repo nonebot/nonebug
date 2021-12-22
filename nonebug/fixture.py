@@ -33,20 +33,20 @@ def nonebug_init(nonebug_clear: None, request) -> None:
 
 
 @pytest.fixture(name="app")
-def nonebug_app(nonebug_init: None) -> App:
+def nonebug_app(nonebug_init: None, monkeypatch: pytest.MonkeyPatch) -> App:
     """
     Get a test app provided by nonebug.
     Use app to define test cases and run them.
     """
-    return App()
+    return App(monkeypatch)
 
 
 @pytest.fixture
-def processor_app(nonebug_init: None) -> ProcessorApp:
+def processor_app(nonebug_init: None, monkeypatch: pytest.MonkeyPatch) -> ProcessorApp:
     """
     Call `nonebug_init` and return a new instance of Processor Test App.
     """
-    return ProcessorApp()
+    return ProcessorApp(monkeypatch)
 
 
 __all__ = ["nonebug_clear", "nonebug_init", "nonebug_app", "processor_app"]

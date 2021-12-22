@@ -1,5 +1,7 @@
 from typing import Optional
 
+import pytest
+
 
 class Context:
     def __init__(self, app: "BaseApp", *args, **kwargs):
@@ -26,8 +28,9 @@ class Context:
 
 
 class BaseApp:
-    def __init__(self):
+    def __init__(self, monkeypatch: pytest.MonkeyPatch):
         self.context: Optional[Context] = None
+        self.monkeypatch: pytest.MonkeyPatch = monkeypatch
 
     async def reset(self) -> None:
         pass

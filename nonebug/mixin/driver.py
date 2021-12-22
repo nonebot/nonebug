@@ -7,25 +7,12 @@ from nonebug.base import BaseApp
 from .call_api import ApiContext
 
 
-class AsgiContext(ApiContext):
-    def __init__(
-        self,
-        app: BaseApp,
-        *args,
-        asgi: ASGIApplication,
-        monkeypatch: pytest.MonkeyPatch,
-        **kwargs,
-    ):
+class DriverContext(ApiContext):
+    def __init__(self, app: BaseApp, *args, **kwargs):
         super().__init__(app, *args, **kwargs)
-        self.asgi = asgi
-        self.monkeypatch = monkeypatch
-        self.client = TestClient(self.asgi)
+        self.monkeypatch: pytest.MonkeyPatch = app.monkeypatch
         self.prepare_adapter()
         self.prepare_bot()
-
-    async def __aenter__(self):
-        await self.client.__aenter__()
-        return await super().__aenter__()
 
     def prepare_adapter(self):
         import nonebot
@@ -47,6 +34,23 @@ class AsgiContext(ApiContext):
 
         self.monkeypatch.setattr(driver, "_bot_connect", _mocked_bot_connect)
 
+
+class ServerContext(DriverContext):
+    def __init__(
+        self,
+        app: BaseApp,
+        *args,
+        asgi: ASGIApplication,
+        **kwargs,
+    ):
+        super().__init__(app, *args, **kwargs)
+        self.asgi = asgi
+        self.client = TestClient(self.asgi)
+
+    async def __aenter__(self):
+        await self.client.__aenter__()
+        return await super().__aenter__()
+
     def get_client(self) -> TestClient:
         return self.client
 
@@ -55,9 +59,29 @@ class AsgiContext(ApiContext):
         self.monkeypatch.undo()
 
 
+# class ClientContext(DriverContext):
+#     def __init__(
+#         self,
+#         app: BaseApp,
+#         *args,
+#         **kwargs,
+#     ):
+#         super().__init__(app, *args, **kwargs)
+#         self.server = self.app.httpserver
+
+#     def get_server(self) -> HTTPServer:
+#         return self.server
+
+#     async def run_test(self):
+#         self.server.clear()
+
+
 class DriverMixin(BaseApp):
-    def test_asgi(self, monkeypatch: pytest.MonkeyPatch) -> AsgiContext:
+    def test_server(self) -> ServerContext:
         import nonebot
 
         asgi = nonebot.get_asgi()
-        return AsgiContext(self, asgi=asgi, monkeypatch=monkeypatch)
+        return ServerContext(self, asgi=asgi, monkeypatch=self.monkeypatch)
+
+    # def test_client(self):
+    #     ...

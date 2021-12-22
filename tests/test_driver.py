@@ -7,7 +7,7 @@ from nonebug.fixture import *
 
 
 @pytest.mark.asyncio
-async def test_driver(app: App, monkeypatch: pytest.MonkeyPatch):
+async def test_driver(app: App):
     import nonebot
     from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
     from nonebot.drivers import URL, Driver, Request, Response, HTTPServerSetup
@@ -45,7 +45,7 @@ async def test_driver(app: App, monkeypatch: pytest.MonkeyPatch):
     driver = nonebot.get_driver()
     driver.register_adapter(FakeAdapter)
 
-    async with app.test_asgi(monkeypatch) as ctx:
+    async with app.test_server() as ctx:
         client = ctx.get_client()
 
         ctx.should_call_api("test", data={"test": "test"}, result="result")
