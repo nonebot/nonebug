@@ -10,9 +10,11 @@ from .model import (
     Finished,
     Rejected,
     RulePass,
+    IgnoreRule,
     RuleNotPass,
     ReceiveEvent,
     PermissionPass,
+    IgnorePermission,
     PermissionNotPass,
 )
 
@@ -23,7 +25,7 @@ if TYPE_CHECKING:
 
 
 class MatcherContext(ApiContext):
-    def __init__(self, app: "ProcessMixin", matcher: Type["Matcher"], *args, **kwargs):
+    def __init__(self, app: "ProcessMixin", *args, matcher: Type["Matcher"], **kwargs):
         super(MatcherContext, self).__init__(app, *args, **kwargs)
         self.matcher_class = matcher
         self.matcher = matcher()
@@ -46,6 +48,11 @@ class MatcherContext(ApiContext):
         self.action_list.append(rule)
         return rule
 
+    def should_ignore_rule(self) -> IgnoreRule:
+        rule = IgnoreRule()
+        self.action_list.append(rule)
+        return rule
+
     def should_pass_permission(self) -> PermissionPass:
         permission = PermissionPass()
         self.action_list.append(permission)
@@ -53,6 +60,11 @@ class MatcherContext(ApiContext):
 
     def should_not_pass_permission(self) -> PermissionNotPass:
         permission = PermissionNotPass()
+        self.action_list.append(permission)
+        return permission
+
+    def should_ignore_permission(self) -> IgnorePermission:
+        permission = IgnorePermission()
         self.action_list.append(permission)
         return permission
 
@@ -105,9 +117,18 @@ class MatcherContext(ApiContext):
                 stack=stack,
                 dependency_cache=dependency_cache,
             )
+            ignore_rule: bool = False
+            ignore_permission: bool = False
             while self.action_list and isinstance(
                 self.action_list[0],
-                (RulePass, RuleNotPass, PermissionPass, PermissionNotPass),
+                (
+                    RulePass,
+                    RuleNotPass,
+                    IgnoreRule,
+                    PermissionPass,
+                    PermissionNotPass,
+                    IgnorePermission,
+                ),
             ):
                 action = self.action_list.pop(0)
                 if isinstance(action, RulePass):
@@ -118,8 +139,14 @@ class MatcherContext(ApiContext):
                     assert permission_passed, "Permission should be passed"
                 elif isinstance(action, PermissionNotPass):
                     assert not permission_passed, "Permission should not be passed"
+                elif isinstance(action, IgnoreRule):
+                    ignore_rule = True
+                elif isinstance(action, IgnorePermission):
+                    ignore_permission = True
 
-            if not rule_passed or not permission_passed:
+            if not ignore_rule and not rule_passed:
+                continue
+            elif not ignore_permission and not permission_passed:
                 continue
 
             try:
@@ -181,4 +208,4 @@ class MatcherContext(ApiContext):
 
 class ProcessMixin(BaseApp):
     def test_matcher(self, matcher: Type["Matcher"]) -> MatcherContext:
-        return MatcherContext(self, matcher)
+        return MatcherContext(self, matcher=matcher)

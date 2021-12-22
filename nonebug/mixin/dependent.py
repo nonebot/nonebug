@@ -24,8 +24,8 @@ class DependentContext(ApiContext):
     def __init__(
         self,
         app: "DependentMixin",
-        dependent: "Dependent",
         *args,
+        dependent: "Dependent",
         **kwargs,
     ):
         super(DependentContext, self).__init__(app, *args, **kwargs)
@@ -49,17 +49,17 @@ class DependentContext(ApiContext):
 class DependentMixin(BaseApp):
     def test_dependent(
         self,
-        handler: Union["Dependent", Callable[..., Any]],
+        dependent: Union["Dependent", Callable[..., Any]],
         allow_types: Optional[List[Type["Param"]]] = None,
         parameterless: Optional[List[Any]] = None,
     ) -> DependentContext:
         from nonebot.dependencies import Dependent
 
-        if not isinstance(handler, Dependent):
-            handler = Dependent[Any].parse(
-                call=handler, parameterless=parameterless, allow_types=allow_types
+        if not isinstance(dependent, Dependent):
+            dependent = Dependent[Any].parse(
+                call=dependent, parameterless=parameterless, allow_types=allow_types
             )
 
-        return DependentContext(self, handler)
+        return DependentContext(self, dependent=dependent)
 
     test_handler = test_dependent

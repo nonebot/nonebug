@@ -1,6 +1,8 @@
 from queue import Queue
 from typing import TYPE_CHECKING, Any, Dict, Type, Union, Optional
 
+import pytest
+
 from nonebug.base import BaseApp, Context
 
 from .model import Api, Send, Model
@@ -31,6 +33,18 @@ class ApiContext(Context):
 
         adapter = adapter or make_fake_adapter()(get_driver(), self)
         return make_fake_bot(base=base)(adapter, self_id)
+
+    def mock_adapter(self, monkeypatch: pytest.MonkeyPatch, adapter: "Adapter") -> None:
+        new_adapter = self.create_adapter()
+        for attr in ("ctx", "_call_api"):
+            monkeypatch.setattr(
+                adapter, attr, getattr(new_adapter, attr), raising=False
+            )
+
+    def mock_bot(self, monkeypatch: pytest.MonkeyPatch, bot: "Bot") -> None:
+        new_bot = self.create_bot()
+        for attr in ("ctx", "send"):
+            monkeypatch.setattr(bot, attr, getattr(new_bot, attr), raising=False)
 
     def should_call_api(self, api: str, data: Dict[str, Any], result: Any) -> Api:
         model = Api(name=api, data=data, result=result)

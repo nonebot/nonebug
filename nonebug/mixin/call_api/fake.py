@@ -9,8 +9,8 @@ if TYPE_CHECKING:
 # fake class should be created every init
 def make_fake_adapter(base: Optional[Type["Adapter"]] = None):
     from nonebot.drivers import Driver
-    from nonebot.adapters import Adapter
     from nonebot.typing import overrides
+    from nonebot.adapters import Bot, Adapter
 
     base = base or Adapter
 
@@ -26,7 +26,7 @@ def make_fake_adapter(base: Optional[Type["Adapter"]] = None):
             return "fake"
 
         @overrides(base)
-        async def _call_api(self, api: str, **data) -> Any:
+        async def _call_api(self, bot: Bot, api: str, **data) -> Any:
             return self.ctx.got_call_api(api, **data)
 
     return FakeAdapter

@@ -44,10 +44,20 @@ class RuleNotPass(Model):
 
 
 @dataclass
+class IgnoreRule(Model):
+    ...
+
+
+@dataclass
 class PermissionPass(Model):
     ...
 
 
 @dataclass
 class PermissionNotPass(Model):
+    ...
+
+
+@dataclass
+class IgnorePermission(Model):
     ...

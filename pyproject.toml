@@ -17,6 +17,7 @@ pytest = "^6.2.5"
 pytest-order = "^1.0.0"
 pytest-asyncio = "^0.16.0"
 nonebot2 = "^2.0.0-beta.1"
+async-asgi-testclient = "^1.4.8"
 
 [tool.poetry.dev-dependencies]
 isort = "^5.10.1"
@@ -33,7 +34,7 @@ nonebug = "nonebug.fixture"
 # default = true
 
 [tool.pytest.ini_options]
-addopts = "--cov=nonebug -p no:nonebug"
+addopts = "--cov nonebug --cov-report term-missing -p no:nonebug"
 
 [tool.black]
 line-length = 88
