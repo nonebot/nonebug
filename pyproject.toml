@@ -14,7 +14,6 @@ classifiers = ["Framework :: Pytest"]
 [tool.poetry.dependencies]
 python = "^3.7.3"
 pytest = "^6.2.5"
-pytest-order = "^1.0.0"
 pytest-asyncio = "^0.16.0"
 nonebot2 = "^2.0.0-beta.1"
 async-asgi-testclient = "^1.4.8"
@@ -23,6 +22,7 @@ async-asgi-testclient = "^1.4.8"
 isort = "^5.10.1"
 black = "^21.11b1"
 pytest-cov = "^3.0.0"
+pytest-order = "^1.0.0"
 nonebot2 = { git = "https://github.com/nonebot/nonebot2.git", branch = "dev" }
 
 [tool.poetry.plugins.pytest11]

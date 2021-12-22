@@ -501,7 +501,7 @@ testing = ["fields", "hunter", "process-tests", "six", "pytest-xdist", "virtuale
 name = "pytest-order"
 version = "1.0.0"
 description = "pytest plugin to run your tests in a specific order"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -727,7 +727,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7.3"
-content-hash = "9031bc8f8445fc7e5a3cc6c6ba5fa1bfa189cc871b5f5183cbf41d3535d1b977"
+content-hash = "c25ad8250e6c1c40667870bb8d7afb8dc45f754ee7a35f7bcba07f3d8dc98d98"
 
 [metadata.files]
 anyio = [
