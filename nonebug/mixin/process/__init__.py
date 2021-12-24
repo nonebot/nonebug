@@ -177,7 +177,7 @@ class MatcherContext(ApiContext):
             except RejectedException:
                 dependency_cache.clear()
                 handler = current_handler.get()
-                self.matcher.handlers.insert(0, handler)
+                await self.matcher.resolve_reject()
                 if not self.action_list or isinstance(
                     self.action_list[0], ReceiveEvent
                 ):
