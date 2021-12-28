@@ -1,21 +1,27 @@
+import sys
 from typing import Generator
 
 import pytest
 
 from nonebug.app import App, ProcessorApp
-from nonebug.helpers import clear_nonebot
+from nonebug.helpers import clear_module, clear_nonebot
 
 
 @pytest.fixture
 def nonebug_clear() -> Generator[None, None, None]:
     """
-    Clear nonebot after test case running completed.
+    Make a snapshot for sys.modules before initializing.
+    Clear nonebot and other modules not in snapshot after test case running completed.
     Ensure every test case has a clean nonebot environment.
 
     By default, this fixture will be auto called by `nonebug_init`.
     """
+    modules = tuple(sys.modules.keys())
     yield None
     clear_nonebot()
+    for module in tuple(sys.modules.keys()):
+        if module not in modules:
+            clear_module(module)
 
 
 @pytest.fixture
