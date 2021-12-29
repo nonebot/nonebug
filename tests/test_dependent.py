@@ -9,7 +9,7 @@ from nonebug import ProcessorApp
 async def test_dependent(app: "ProcessorApp"):
     from nonebot.adapters import Event
     from nonebot.params import EventParam
-    from nonebot.exception import SkippedException
+    from nonebot.exception import TypeMisMatch
 
     FakeEvent = make_fake_event(test_field=(str, "test"))
     FakeEvent2 = make_fake_event(test_field2=(str, "test2"))
@@ -32,7 +32,7 @@ async def test_dependent(app: "ProcessorApp"):
     try:
         async with app.test_dependent(_handle_fake, allow_types=[EventParam]) as ctx:
             ctx.pass_params(event=event)
-    except SkippedException as e:
+    except TypeMisMatch as e:
         assert e.param.name == "event"
         assert e.value is event
     else:
