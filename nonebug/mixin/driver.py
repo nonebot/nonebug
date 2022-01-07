@@ -14,9 +14,8 @@ DC = TypeVar("DC", bound="DriverContext")
 class DriverContext(ApiContext):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.ctx = self.app.monkeypatch.context()
         self.m: Optional[pytest.MonkeyPatch] = None
-        self.prepare_adapter()
-        self.prepare_bot()
 
     @property
     def monkeypatch(self) -> pytest.MonkeyPatch:
@@ -25,7 +24,9 @@ class DriverContext(ApiContext):
         return self.m
 
     async def __aenter__(self: DC) -> DC:
-        self.m = self.app.monkeypatch.context().__enter__()
+        self.m = self.ctx.__enter__()
+        self.prepare_adapter()
+        self.prepare_bot()
         return await super().__aenter__()
 
     def prepare_adapter(self):
@@ -50,7 +51,8 @@ class DriverContext(ApiContext):
 
     async def run_test(self):
         await super().run_test()
-        self.monkeypatch.undo()
+        self.ctx.__exit__(None, None, None)
+        self.m = None
 
 
 @final
