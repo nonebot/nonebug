@@ -106,9 +106,12 @@ class MatcherContext(ApiContext):
             ), f"Matcher has no handler remain, but received event {receive_event}"
 
             # trie preprocess
-            TrieRule.get_value(
-                receive_event.bot, receive_event.event, receive_event.state
-            )
+            try:
+                TrieRule.get_value(
+                    receive_event.bot, receive_event.event, receive_event.state
+                )
+            except Exception:
+                pass
 
             async with stack:
                 # test rule and permission
