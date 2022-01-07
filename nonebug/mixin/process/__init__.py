@@ -1,5 +1,7 @@
 from contextlib import AsyncExitStack
-from typing import TYPE_CHECKING, List, Type, Optional
+from typing import TYPE_CHECKING, List, Type, Optional, final
+
+import pytest
 
 from nonebug.base import BaseApp
 
@@ -24,12 +26,14 @@ if TYPE_CHECKING:
     from nonebot.typing import T_State, T_DependencyCache
 
 
+@final
 class MatcherContext(ApiContext):
     def __init__(self, app: "ProcessMixin", *args, matcher: Type["Matcher"], **kwargs):
         super(MatcherContext, self).__init__(app, *args, **kwargs)
         self.matcher_class = matcher
         self.matcher = matcher()
         self.action_list: List[Model] = []
+        self.monkeypatch: pytest.MonkeyPatch = app.monkeypatch
 
     def receive_event(
         self, bot: "Bot", event: "Event", state: Optional["T_State"] = None
@@ -92,129 +96,148 @@ class MatcherContext(ApiContext):
             RejectedException,
         )
 
-        while self.action_list:
-            # prepare for next event
-            stack = AsyncExitStack()
-            dependency_cache: T_DependencyCache = {}
-            # fake event received
-            receive_event = self.action_list.pop(0)
-            assert isinstance(
-                receive_event, ReceiveEvent
-            ), f"Unexpected model {receive_event} expected ReceiveEvent"
-            assert (
-                self.matcher.handlers
-            ), f"Matcher has no handler remain, but received event {receive_event}"
+        with self.monkeypatch.context() as m:
+            while self.action_list:
+                # prepare for next event
+                stack = AsyncExitStack()
+                dependency_cache: T_DependencyCache = {}
+                # fake event received
+                receive_event = self.action_list.pop(0)
+                assert isinstance(
+                    receive_event, ReceiveEvent
+                ), f"Unexpected model {receive_event} expected ReceiveEvent"
+                assert (
+                    self.matcher.handlers
+                ), f"Matcher has no handler remain, but received event {receive_event}"
 
-            # trie preprocess
-            try:
-                TrieRule.get_value(
-                    receive_event.bot, receive_event.event, receive_event.state
-                )
-            except Exception:
-                pass
-
-            async with stack:
-                # test rule and permission
-                rule_passed = await self.matcher.check_rule(
-                    bot=receive_event.bot,
-                    event=receive_event.event,
-                    state=receive_event.state,
-                    stack=stack,
-                    dependency_cache=dependency_cache,
-                )
-                permission_passed = await self.matcher.check_perm(
-                    bot=receive_event.bot,
-                    event=receive_event.event,
-                    stack=stack,
-                    dependency_cache=dependency_cache,
-                )
-                ignore_rule: bool = False
-                ignore_permission: bool = False
-                while self.action_list and isinstance(
-                    self.action_list[0],
-                    (
-                        RulePass,
-                        RuleNotPass,
-                        IgnoreRule,
-                        PermissionPass,
-                        PermissionNotPass,
-                        IgnorePermission,
-                    ),
-                ):
-                    action = self.action_list.pop(0)
-                    if isinstance(action, RulePass):
-                        assert rule_passed, "Rule should be passed"
-                    elif isinstance(action, RuleNotPass):
-                        assert not rule_passed, "Rule should not be passed"
-                    elif isinstance(action, PermissionPass):
-                        assert permission_passed, "Permission should be passed"
-                    elif isinstance(action, PermissionNotPass):
-                        assert not permission_passed, "Permission should not be passed"
-                    elif isinstance(action, IgnoreRule):
-                        ignore_rule = True
-                    elif isinstance(action, IgnorePermission):
-                        ignore_permission = True
-
-                if not ignore_rule and not rule_passed:
-                    continue
-                elif not ignore_permission and not permission_passed:
-                    continue
-
+                # trie preprocess
                 try:
-                    await self.matcher.simple_run(
+                    TrieRule.get_value(
+                        receive_event.bot, receive_event.event, receive_event.state
+                    )
+                except Exception:
+                    pass
+
+                async with stack:
+                    # test rule and permission
+                    rule_passed = await self.matcher.check_rule(
                         bot=receive_event.bot,
                         event=receive_event.event,
                         state=receive_event.state,
                         stack=stack,
                         dependency_cache=dependency_cache,
                     )
-                except PausedException:
-                    handler = current_handler.get()
-                    if not self.action_list or isinstance(
-                        self.action_list[0], ReceiveEvent
+                    permission_passed = await self.matcher.check_perm(
+                        bot=receive_event.bot,
+                        event=receive_event.event,
+                        stack=stack,
+                        dependency_cache=dependency_cache,
+                    )
+                    ignore_rule: bool = False
+                    ignore_permission: bool = False
+                    while self.action_list and isinstance(
+                        self.action_list[0],
+                        (
+                            RulePass,
+                            RuleNotPass,
+                            IgnoreRule,
+                            PermissionPass,
+                            PermissionNotPass,
+                            IgnorePermission,
+                        ),
                     ):
+                        action = self.action_list.pop(0)
+                        if isinstance(action, RulePass):
+                            assert rule_passed, "Rule should be passed"
+                        elif isinstance(action, RuleNotPass):
+                            assert not rule_passed, "Rule should not be passed"
+                        elif isinstance(action, PermissionPass):
+                            assert permission_passed, "Permission should be passed"
+                        elif isinstance(action, PermissionNotPass):
+                            assert (
+                                not permission_passed
+                            ), "Permission should not be passed"
+                        elif isinstance(action, IgnoreRule):
+                            ignore_rule = True
+                        elif isinstance(action, IgnorePermission):
+                            ignore_permission = True
+
+                    if not ignore_rule and not rule_passed:
                         continue
-                    paused = self.action_list.pop(0)
-                    assert isinstance(
-                        paused, Paused
-                    ), f"Matcher paused while running handler {handler} but got {paused}"
-                    self.matcher.type = await self.matcher.update_type(
-                        bot=receive_event.bot, event=receive_event.event
-                    )
-                    self.matcher.permission = await self.matcher.update_permission(
-                        bot=receive_event.bot, event=receive_event.event
-                    )
-                    self.matcher.rule = Rule()
-                except RejectedException:
-                    handler = current_handler.get()
-                    await self.matcher.resolve_reject()
-                    if not self.action_list or isinstance(
-                        self.action_list[0], ReceiveEvent
-                    ):
+                    elif not ignore_permission and not permission_passed:
                         continue
-                    rejected = self.action_list.pop(0)
-                    assert isinstance(
-                        rejected, Rejected
-                    ), f"Matcher rejected while running handler {handler} but got {rejected}"
-                    self.matcher.type = await self.matcher.update_type(
-                        bot=receive_event.bot, event=receive_event.event
-                    )
-                    self.matcher.permission = await self.matcher.update_permission(
-                        bot=receive_event.bot, event=receive_event.event
-                    )
-                    self.matcher.rule = Rule()
-                except FinishedException:
-                    handler = current_handler.get()
-                    if not self.action_list:
-                        continue
-                    finished = self.action_list.pop(0)
-                    assert isinstance(
-                        finished, Finished
-                    ), f"Matcher finished while running handler {handler} but got {finished}"
-                    assert (
-                        not self.action_list
-                    ), f"Unexpected models {self.action_list}, expected empty after finished"
-                    break
+
+                    try:
+                        await self.matcher.simple_run(
+                            bot=receive_event.bot,
+                            event=receive_event.event,
+                            state=receive_event.state,
+                            stack=stack,
+                            dependency_cache=dependency_cache,
+                        )
+                    except PausedException:
+                        handler = current_handler.get()
+                        if not self.action_list or isinstance(
+                            self.action_list[0], ReceiveEvent
+                        ):
+                            continue
+                        paused = self.action_list.pop(0)
+                        assert isinstance(
+                            paused, Paused
+                        ), f"Matcher paused while running handler {handler} but got {paused}"
+                        m.setattr(
+                            self.matcher_class,
+                            "type",
+                            await self.matcher.update_type(
+                                bot=receive_event.bot, event=receive_event.event
+                            ),
+                        )
+                        m.setattr(
+                            self.matcher_class,
+                            "permission",
+                            await self.matcher.update_permission(
+                                bot=receive_event.bot, event=receive_event.event
+                            ),
+                        )
+                        m.setattr(self.matcher_class, "rule", Rule())
+                    except RejectedException:
+                        handler = current_handler.get()
+                        await self.matcher.resolve_reject()
+                        if not self.action_list or isinstance(
+                            self.action_list[0], ReceiveEvent
+                        ):
+                            continue
+                        rejected = self.action_list.pop(0)
+                        assert isinstance(
+                            rejected, Rejected
+                        ), f"Matcher rejected while running handler {handler} but got {rejected}"
+                        m.setattr(
+                            self.matcher_class,
+                            "type",
+                            await self.matcher.update_type(
+                                bot=receive_event.bot, event=receive_event.event
+                            ),
+                        )
+                        m.setattr(
+                            self.matcher_class,
+                            "permission",
+                            await self.matcher.update_permission(
+                                bot=receive_event.bot, event=receive_event.event
+                            ),
+                        )
+                        m.setattr(self.matcher_class, "rule", Rule())
+                    except FinishedException:
+                        handler = current_handler.get()
+                        if not self.action_list:
+                            continue
+                        finished = self.action_list.pop(0)
+                        assert isinstance(
+                            finished, Finished
+                        ), f"Matcher finished while running handler {handler} but got {finished}"
+                        assert (
+                            not self.action_list
+                        ), f"Unexpected models {self.action_list}, expected empty after finished"
+                        break
 
 
 class ProcessMixin(BaseApp):

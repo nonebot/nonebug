@@ -56,3 +56,16 @@ test_rule_permission_not_pass = on_message(
 @test_rule_permission_not_pass.handle()
 async def _():
     pass
+
+
+test_monkeypatch = on_message()
+
+
+@test_monkeypatch.permission_updater
+async def _():
+    return Permission(lambda: False)
+
+
+@test_monkeypatch.handle()
+async def _():
+    await test_monkeypatch.reject()

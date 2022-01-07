@@ -18,6 +18,7 @@ async def test_process(app: App, load_plugin: Set["Plugin"]):
         test_pause,
         test_finish,
         test_reject,
+        test_monkeypatch,
         test_rule_permission_pass,
         test_rule_permission_not_pass,
     )
@@ -71,3 +72,11 @@ async def test_process(app: App, load_plugin: Set["Plugin"]):
         ctx.receive_event(bot, event)
         ctx.should_ignore_rule()
         ctx.should_ignore_permission()
+
+    async with app.test_matcher(test_monkeypatch) as ctx:
+        bot = ctx.create_bot()
+        event = make_fake_event()()
+        ctx.receive_event(bot, event)
+        ctx.should_rejected()
+        ctx.receive_event(bot, event)
+        ctx.should_not_pass_permission()

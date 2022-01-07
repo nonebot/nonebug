@@ -1,3 +1,5 @@
+from typing import TypeVar, Optional, final
+
 import pytest
 from asgiref.typing import ASGIApplication
 from async_asgi_testclient import TestClient
@@ -6,13 +8,25 @@ from nonebug.base import BaseApp
 
 from .call_api import ApiContext
 
+DC = TypeVar("DC", bound="DriverContext")
+
 
 class DriverContext(ApiContext):
-    def __init__(self, app: BaseApp, *args, **kwargs):
-        super().__init__(app, *args, **kwargs)
-        self.monkeypatch: pytest.MonkeyPatch = app.monkeypatch
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.m: Optional[pytest.MonkeyPatch] = None
         self.prepare_adapter()
         self.prepare_bot()
+
+    @property
+    def monkeypatch(self) -> pytest.MonkeyPatch:
+        if not self.m:
+            raise RuntimeError("Monkeypatch only available in test context")
+        return self.m
+
+    async def __aenter__(self: DC) -> DC:
+        self.m = self.app.monkeypatch.context().__enter__()
+        return await super().__aenter__()
 
     def prepare_adapter(self):
         import nonebot
@@ -34,7 +48,12 @@ class DriverContext(ApiContext):
 
         self.monkeypatch.setattr(driver, "_bot_connect", _mocked_bot_connect)
 
+    async def run_test(self):
+        await super().run_test()
+        self.monkeypatch.undo()
 
+
+@final
 class ServerContext(DriverContext):
     def __init__(
         self,
@@ -55,10 +74,11 @@ class ServerContext(DriverContext):
         return self.client
 
     async def run_test(self):
+        await super().run_test()
         await self.client.__aexit__(None, None, None)
-        self.monkeypatch.undo()
 
 
+# @final
 # class ClientContext(DriverContext):
 #     def __init__(
 #         self,
