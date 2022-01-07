@@ -177,6 +177,21 @@ class MatcherContext(ApiContext):
                         )
                     except PausedException:
                         handler = current_handler.get()
+                        m.setattr(
+                            self.matcher_class,
+                            "type",
+                            await self.matcher.update_type(
+                                bot=receive_event.bot, event=receive_event.event
+                            ),
+                        )
+                        m.setattr(
+                            self.matcher_class,
+                            "permission",
+                            await self.matcher.update_permission(
+                                bot=receive_event.bot, event=receive_event.event
+                            ),
+                        )
+                        m.setattr(self.matcher_class, "rule", Rule())
                         if not self.action_list or isinstance(
                             self.action_list[0], ReceiveEvent
                         ):
@@ -185,6 +200,9 @@ class MatcherContext(ApiContext):
                         assert isinstance(
                             paused, Paused
                         ), f"Matcher paused while running handler {handler} but got {paused}"
+                    except RejectedException:
+                        handler = current_handler.get()
+                        await self.matcher.resolve_reject()
                         m.setattr(
                             self.matcher_class,
                             "type",
@@ -200,9 +218,6 @@ class MatcherContext(ApiContext):
                             ),
                         )
                         m.setattr(self.matcher_class, "rule", Rule())
-                    except RejectedException:
-                        handler = current_handler.get()
-                        await self.matcher.resolve_reject()
                         if not self.action_list or isinstance(
                             self.action_list[0], ReceiveEvent
                         ):
@@ -211,21 +226,6 @@ class MatcherContext(ApiContext):
                         assert isinstance(
                             rejected, Rejected
                         ), f"Matcher rejected while running handler {handler} but got {rejected}"
-                        m.setattr(
-                            self.matcher_class,
-                            "type",
-                            await self.matcher.update_type(
-                                bot=receive_event.bot, event=receive_event.event
-                            ),
-                        )
-                        m.setattr(
-                            self.matcher_class,
-                            "permission",
-                            await self.matcher.update_permission(
-                                bot=receive_event.bot, event=receive_event.event
-                            ),
-                        )
-                        m.setattr(self.matcher_class, "rule", Rule())
                     except FinishedException:
                         handler = current_handler.get()
                         if not self.action_list:
