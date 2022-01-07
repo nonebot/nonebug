@@ -84,6 +84,7 @@ class MatcherContext(ApiContext):
         return finished
 
     async def run_test(self):
+        from nonebot.rule import TrieRule
         from nonebot.matcher import current_handler
         from nonebot.exception import (
             PausedException,
@@ -103,6 +104,11 @@ class MatcherContext(ApiContext):
             assert (
                 self.matcher.handlers
             ), f"Matcher has no handler remain, but received event {receive_event}"
+
+            # trie preprocess
+            TrieRule.get_value(
+                receive_event.bot, receive_event.event, receive_event.state
+            )
 
             async with stack:
                 # test rule and permission
