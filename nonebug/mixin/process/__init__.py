@@ -84,7 +84,7 @@ class MatcherContext(ApiContext):
         return finished
 
     async def run_test(self):
-        from nonebot.rule import TrieRule
+        from nonebot.rule import Rule, TrieRule
         from nonebot.matcher import current_handler
         from nonebot.exception import (
             PausedException,
@@ -184,6 +184,7 @@ class MatcherContext(ApiContext):
                     self.matcher.permission = await self.matcher.update_permission(
                         bot=receive_event.bot, event=receive_event.event
                     )
+                    self.matcher.rule = Rule()
                 except RejectedException:
                     handler = current_handler.get()
                     await self.matcher.resolve_reject()
@@ -201,6 +202,7 @@ class MatcherContext(ApiContext):
                     self.matcher.permission = await self.matcher.update_permission(
                         bot=receive_event.bot, event=receive_event.event
                     )
+                    self.matcher.rule = Rule()
                 except FinishedException:
                     handler = current_handler.get()
                     if not self.action_list:
