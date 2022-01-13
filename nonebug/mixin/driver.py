@@ -1,4 +1,5 @@
-from typing import TypeVar, Optional, final
+from typing_extensions import final
+from typing import TypeVar, Optional
 
 import pytest
 from asgiref.typing import ASGIApplication

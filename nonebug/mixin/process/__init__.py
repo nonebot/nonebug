@@ -1,5 +1,6 @@
+from typing_extensions import final
 from contextlib import AsyncExitStack
-from typing import TYPE_CHECKING, List, Type, Optional, final
+from typing import TYPE_CHECKING, List, Type, Optional
 
 import pytest
 

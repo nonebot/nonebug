@@ -1,3 +1,4 @@
+from typing_extensions import final
 from contextlib import AsyncExitStack
 from typing import (
     TYPE_CHECKING,
@@ -8,7 +9,6 @@ from typing import (
     Union,
     Callable,
     Optional,
-    final,
 )
 
 from nonebug.base import BaseApp
