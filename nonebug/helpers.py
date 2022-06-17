@@ -21,12 +21,11 @@ def clear_plugin(plugin: "Plugin") -> None:
 
 
 def clear_plugins() -> None:
-    from nonebot.plugin import _managers
-    from nonebot.plugin.plugin import plugins
+    from nonebot.plugin import _plugins, _managers
 
-    for plugin in plugins.values():
+    for plugin in _plugins.values():
         clear_plugin(plugin)
-    plugins.clear()
+    _plugins.clear()
     _managers.clear()
 
 
