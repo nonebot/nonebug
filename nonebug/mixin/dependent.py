@@ -8,6 +8,7 @@ from typing import (
     Type,
     Union,
     Callable,
+    Iterable,
     Optional,
 )
 
@@ -50,14 +51,16 @@ class DependentMixin(BaseApp):
     def test_dependent(
         self,
         dependent: Union["Dependent", Callable[..., Any]],
-        allow_types: Optional[List[Type["Param"]]] = None,
-        parameterless: Optional[List[Any]] = None,
+        allow_types: Optional[Iterable[Type["Param"]]] = None,
+        parameterless: Optional[Iterable[Any]] = None,
     ) -> DependentContext:
         from nonebot.dependencies import Dependent
 
         if not isinstance(dependent, Dependent):
             dependent = Dependent[Any].parse(
-                call=dependent, parameterless=parameterless, allow_types=allow_types
+                call=dependent,
+                parameterless=parameterless,
+                allow_types=allow_types or tuple(),
             )
 
         return DependentContext(self, dependent=dependent)
