@@ -17,10 +17,15 @@ class ApiContext(Context):
         super().__init__(app, *args, **kwargs)
         self.wait_list: Queue[Model] = Queue()
 
-    def create_adapter(self, *, base: Optional[Type["Adapter"]] = None) -> "Adapter":
+    def create_adapter(
+        self,
+        *,
+        base: Optional[Type["Adapter"]] = None,
+        **kwargs: Any,
+    ) -> "Adapter":
         from nonebot import get_driver
 
-        return make_fake_adapter(base=base)(get_driver(), self)
+        return make_fake_adapter(base=base)(get_driver(), self, **kwargs)
 
     def create_bot(
         self,
@@ -28,11 +33,12 @@ class ApiContext(Context):
         base: Optional[Type["Bot"]] = None,
         adapter: Optional["Adapter"] = None,
         self_id: str = "test",
+        **kwargs: Any,
     ) -> "Bot":
         from nonebot import get_driver
 
         adapter = adapter or make_fake_adapter()(get_driver(), self)
-        return make_fake_bot(base=base)(adapter, self_id)
+        return make_fake_bot(base=base)(adapter, self_id, **kwargs)
 
     def mock_adapter(self, monkeypatch: pytest.MonkeyPatch, adapter: "Adapter") -> None:
         new_adapter = self.create_adapter()
