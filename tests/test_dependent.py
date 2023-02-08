@@ -17,7 +17,7 @@ async def test_dependent(app: "ProcessorApp"):
     def _handle(event: Event):
         ...
 
-    def _handle_fake(event: FakeEvent):
+    def _handle_fake(event: FakeEvent):  # type: ignore
         ...
 
     def _handle_return():
