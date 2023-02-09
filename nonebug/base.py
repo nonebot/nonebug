@@ -1,6 +1,8 @@
 from typing import Optional
 
-import pytest
+from nonebot.matcher import matchers
+
+from .provider import NoneBugProvider
 
 
 class Context:
@@ -28,9 +30,11 @@ class Context:
 
 
 class BaseApp:
-    def __init__(self, monkeypatch: pytest.MonkeyPatch):
+    def __init__(self):
         self.context: Optional[Context] = None
-        self.monkeypatch: pytest.MonkeyPatch = monkeypatch
+        if not isinstance(matchers.provider, NoneBugProvider):
+            raise RuntimeError("NoneBug is not initialized")
+        self.provider = matchers.provider
 
     async def reset(self) -> None:
         pass

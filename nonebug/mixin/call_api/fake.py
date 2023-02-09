@@ -27,7 +27,7 @@ def make_fake_adapter(base: Optional[Type["Adapter"]] = None):
 
         @overrides(base)
         async def _call_api(self, bot: Bot, api: str, **data) -> Any:
-            return self.ctx.got_call_api(api, **data)
+            return self.ctx.got_call_api(self, api, **data)
 
     return FakeAdapter
 
@@ -50,6 +50,6 @@ def make_fake_bot(base: Optional[Type["Bot"]] = None) -> Type["Bot"]:
             message: Union[str, "Message", "MessageSegment"],
             **kwargs,
         ) -> Any:
-            return self.ctx.got_call_send(event, message, **kwargs)
+            return self.ctx.got_call_send(self, event, message, **kwargs)
 
     return FakeBot

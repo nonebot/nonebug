@@ -15,7 +15,7 @@ classifiers = ["Framework :: Pytest"]
 python = "^3.8"
 pytest = "^7.0.0"
 asgiref = "^3.4.0"
-nonebot2 = "^2.0.0-beta.1"
+nonebot2 = "^2.0.0-rc.2"
 typing-extensions = "^4.0.0"
 async-asgi-testclient = "^1.4.8"
 

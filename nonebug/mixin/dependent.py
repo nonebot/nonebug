@@ -1,23 +1,12 @@
 from typing_extensions import final
 from contextlib import AsyncExitStack
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Type,
-    Union,
-    Callable,
-    Iterable,
-    Optional,
-)
+from typing import Any, Dict, Type, Union, Callable, Iterable, Optional
+
+from nonebot.dependencies import Param, Dependent
 
 from nonebug.base import BaseApp
 
 from .call_api import ApiContext
-
-if TYPE_CHECKING:
-    from nonebot.dependencies import Param, Dependent
 
 
 @final

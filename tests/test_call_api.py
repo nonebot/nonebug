@@ -1,13 +1,14 @@
 import pytest
 from utils import make_fake_event
+from nonebot.adapters import Bot, Adapter
 
+from nonebug import App
 from nonebug.fixture import *
-from nonebug import ProcessorApp
 
 
 @pytest.mark.asyncio
-async def test_should_call_api(processor_app: "ProcessorApp"):
-    async with processor_app.test_api() as ctx:
+async def test_should_call_api(app: App):
+    async with app.test_api() as ctx:
         api = ctx.should_call_api("test", {"data": "data"}, "result")
         queue = ctx.wait_list
         assert not queue.empty()
@@ -20,7 +21,7 @@ async def test_should_call_api(processor_app: "ProcessorApp"):
 
 
 @pytest.mark.asyncio
-async def test_should_call_send(processor_app: "ProcessorApp"):
+async def test_should_call_send(app: App):
     from nonebot.adapters import Event, Message
 
     class FakeEvent(Event):
@@ -49,7 +50,7 @@ async def test_should_call_send(processor_app: "ProcessorApp"):
             extra = "forbid"
 
     event = FakeEvent()
-    async with processor_app.test_api() as ctx:
+    async with app.test_api() as ctx:
         send = ctx.should_call_send(event, "test message", "result")
         queue = ctx.wait_list
         assert not queue.empty()
@@ -62,34 +63,33 @@ async def test_should_call_send(processor_app: "ProcessorApp"):
 
 
 @pytest.mark.asyncio
-async def test_got_call(processor_app: "ProcessorApp"):
-    async with processor_app.test_api() as ctx:
-        bot = ctx.create_bot()
-        api = ctx.should_call_api("test", {"key": "value"}, "result")
+async def test_got_call(app: App):
+    async with app.test_api() as ctx:
+        adapter = ctx.create_adapter()
+        bot = ctx.create_bot(adapter=adapter)
+        api = ctx.should_call_api("test", {"key": "value"}, "result", adapter=adapter)
         result = await bot.call_api("test", key="value")
         assert ctx.wait_list.empty()
         assert result == "result"
 
-    async with processor_app.test_api() as ctx:
+    async with app.test_api() as ctx:
         bot = ctx.create_bot()
         event = make_fake_event()()
-        api = ctx.should_call_send(event, "test", "result", key="value")
+        api = ctx.should_call_send(event, "test", "result", bot=bot, key="value")
         result = await bot.send(event, "test", key="value")
         assert ctx.wait_list.empty()
         assert result == "result"
 
 
 @pytest.mark.asyncio
-async def test_fake(processor_app: "ProcessorApp"):
-    from nonebot.adapters import Bot, Adapter
-
+async def test_fake(app: App):
     class FakeAdapter(Adapter):
         ...
 
     class FakeBot(Bot):
         ...
 
-    async with processor_app.test_api() as ctx:
+    async with app.test_api() as ctx:
         adapter = ctx.create_adapter(base=FakeAdapter)
         assert isinstance(adapter, FakeAdapter)
         assert adapter.get_name() == "fake"

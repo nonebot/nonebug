@@ -1,5 +1,5 @@
 from typing_extensions import final
-from contextlib import AsyncExitStack
+from contextlib import AsyncExitStack, suppress
 from typing import TYPE_CHECKING, List, Type, Optional
 
 import pytest
@@ -34,7 +34,6 @@ class MatcherContext(ApiContext):
         self.matcher_class = matcher
         self.matcher = matcher()
         self.action_list: List[Model] = []
-        self.monkeypatch: pytest.MonkeyPatch = app.monkeypatch
 
     def receive_event(
         self, bot: "Bot", event: "Event", state: Optional["T_State"] = None
@@ -97,7 +96,7 @@ class MatcherContext(ApiContext):
             RejectedException,
         )
 
-        with self.monkeypatch.context() as m:
+        with pytest.MonkeyPatch.context() as m:
             while self.action_list:
                 # prepare for next event
                 stack = AsyncExitStack()
@@ -112,13 +111,10 @@ class MatcherContext(ApiContext):
                 ), f"Matcher has no handler remain, but received event {receive_event}"
 
                 # trie preprocess
-                try:
+                with suppress(Exception):
                     TrieRule.get_value(
                         receive_event.bot, receive_event.event, receive_event.state
                     )
-                except Exception:
-                    pass
-
                 async with stack:
                     # test rule and permission
                     rule_passed = await self.matcher.check_rule(

@@ -1,12 +1,12 @@
 import pytest
 from utils import make_fake_event
 
+from nonebug import App
 from nonebug.fixture import *
-from nonebug import ProcessorApp
 
 
 @pytest.mark.asyncio
-async def test_dependent(app: "ProcessorApp"):
+async def test_dependent(app: App):
     from nonebot.adapters import Event
     from nonebot.params import EventParam
     from nonebot.exception import TypeMisMatch

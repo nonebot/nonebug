@@ -1,15 +1,14 @@
 from queue import Queue
-from typing import TYPE_CHECKING, Any, Dict, Type, Union, Optional
+from typing import Any, Dict, Type, Union, Optional
 
 import pytest
+from nonebot import get_driver
+from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
 
 from nonebug.base import BaseApp, Context
 
 from .model import Api, Send, Model
 from .fake import make_fake_bot, make_fake_adapter
-
-if TYPE_CHECKING:
-    from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
 
 
 class ApiContext(Context):
@@ -20,40 +19,42 @@ class ApiContext(Context):
     def create_adapter(
         self,
         *,
-        base: Optional[Type["Adapter"]] = None,
+        base: Optional[Type[Adapter]] = None,
         **kwargs: Any,
-    ) -> "Adapter":
-        from nonebot import get_driver
-
+    ) -> Adapter:
         return make_fake_adapter(base=base)(get_driver(), self, **kwargs)
 
     def create_bot(
         self,
         *,
-        base: Optional[Type["Bot"]] = None,
-        adapter: Optional["Adapter"] = None,
+        base: Optional[Type[Bot]] = None,
+        adapter: Optional[Adapter] = None,
         self_id: str = "test",
         **kwargs: Any,
-    ) -> "Bot":
-        from nonebot import get_driver
-
+    ) -> Bot:
         adapter = adapter or make_fake_adapter()(get_driver(), self)
         return make_fake_bot(base=base)(adapter, self_id, **kwargs)
 
-    def mock_adapter(self, monkeypatch: pytest.MonkeyPatch, adapter: "Adapter") -> None:
+    def mock_adapter(self, monkeypatch: pytest.MonkeyPatch, adapter: Adapter) -> None:
         new_adapter = self.create_adapter()
         for attr in ("ctx", "_call_api"):
             monkeypatch.setattr(
                 adapter, attr, getattr(new_adapter, attr), raising=False
             )
 
-    def mock_bot(self, monkeypatch: pytest.MonkeyPatch, bot: "Bot") -> None:
+    def mock_bot(self, monkeypatch: pytest.MonkeyPatch, bot: Bot) -> None:
         new_bot = self.create_bot()
         for attr in ("ctx", "send"):
             monkeypatch.setattr(bot, attr, getattr(new_bot, attr), raising=False)
 
-    def should_call_api(self, api: str, data: Dict[str, Any], result: Any) -> Api:
-        model = Api(name=api, data=data, result=result)
+    def should_call_api(
+        self,
+        api: str,
+        data: Dict[str, Any],
+        result: Any,
+        adapter: Optional[Adapter] = None,
+    ) -> Api:
+        model = Api(name=api, data=data, result=result, adapter=adapter)
         self.wait_list.put(model)
         return model
 
@@ -62,13 +63,16 @@ class ApiContext(Context):
         event: "Event",
         message: Union[str, "Message", "MessageSegment"],
         result: Any,
+        bot: Optional[Bot] = None,
         **kwargs: Any,
     ) -> Send:
-        model = Send(event=event, message=message, kwargs=kwargs, result=result)
+        model = Send(
+            event=event, message=message, kwargs=kwargs, result=result, bot=bot
+        )
         self.wait_list.put(model)
         return model
 
-    def got_call_api(self, api: str, **data: Any) -> Any:
+    def got_call_api(self, adapter: Adapter, api: str, **data: Any) -> Any:
         assert (
             not self.wait_list.empty()
         ), f"Application has no api call but expected api={api} data={data}"
@@ -82,12 +86,17 @@ class ApiContext(Context):
         assert (
             model.data == data
         ), f"Application got api call {api} with data {data} but expected {model.data}"
+        if model.adapter:
+            assert (
+                model.adapter == adapter
+            ), f"Application got api call {api} with adapter {adapter} but expected {model.adapter}"
         return model.result
 
     def got_call_send(
         self,
-        event: "Event",
-        message: Union[str, "Message", "MessageSegment"],
+        bot: Bot,
+        event: Event,
+        message: Union[str, Message, MessageSegment],
         **kwargs: Any,
     ) -> Any:
         assert (
@@ -106,6 +115,10 @@ class ApiContext(Context):
         assert (
             model.kwargs == kwargs
         ), f"Application got send call with kwargs {kwargs} but expected {model.kwargs}"
+        if model.bot:
+            assert (
+                model.bot == bot
+            ), f"Application got send call with bot {bot} but expected {model.bot}"
         return model.result
 
 

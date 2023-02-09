@@ -1,7 +1,10 @@
+from functools import wraps
 from typing_extensions import final
 from typing import TypeVar, Optional
 
 import pytest
+import nonebot
+from nonebot.adapters import Bot
 from asgiref.typing import ASGIApplication
 from async_asgi_testclient import TestClient
 
@@ -15,7 +18,7 @@ DC = TypeVar("DC", bound="DriverContext")
 class DriverContext(ApiContext):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.ctx = self.app.monkeypatch.context()
+        self.ctx = pytest.MonkeyPatch.context()
         self.m: Optional[pytest.MonkeyPatch] = None
 
     @property
@@ -31,24 +34,22 @@ class DriverContext(ApiContext):
         return await super().__aenter__()
 
     def prepare_adapter(self):
-        import nonebot
-
         driver = nonebot.get_driver()
         for adapter in driver._adapters.values():
             self.mock_adapter(self.monkeypatch, adapter)
 
     def prepare_bot(self):
-        import nonebot
-        from nonebot.adapters import Bot
-
         driver = nonebot.get_driver()
         origin = driver._bot_connect
 
-        def _mocked_bot_connect(bot: Bot):
-            self.mock_bot(self.monkeypatch, bot)
-            origin(bot)
+        if not hasattr(origin, "__wrapped__"):
 
-        self.monkeypatch.setattr(driver, "_bot_connect", _mocked_bot_connect)
+            @wraps(origin)
+            def _mocked_bot_connect(bot: Bot):
+                self.mock_bot(self.monkeypatch, bot)
+                origin(bot)
+
+            self.monkeypatch.setattr(driver, "_bot_connect", _mocked_bot_connect)
 
     async def run_test(self):
         await super().run_test()
@@ -104,7 +105,7 @@ class DriverMixin(BaseApp):
         import nonebot
 
         asgi = nonebot.get_asgi()
-        return ServerContext(self, asgi=asgi, monkeypatch=self.monkeypatch)
+        return ServerContext(self, asgi=asgi)
 
     # def test_client(self):
     #     ...
