@@ -1,4 +1,5 @@
 import pytest
+from nonebot import get_bots
 from utils import make_fake_event
 from nonebot.adapters import Bot, Adapter
 
@@ -63,25 +64,6 @@ async def test_should_call_send(app: App):
 
 
 @pytest.mark.asyncio
-async def test_got_call(app: App):
-    async with app.test_api() as ctx:
-        adapter = ctx.create_adapter()
-        bot = ctx.create_bot(adapter=adapter)
-        api = ctx.should_call_api("test", {"key": "value"}, "result", adapter=adapter)
-        result = await bot.call_api("test", key="value")
-        assert ctx.wait_list.empty()
-        assert result == "result"
-
-    async with app.test_api() as ctx:
-        bot = ctx.create_bot()
-        event = make_fake_event()()
-        api = ctx.should_call_send(event, "test", "result", bot=bot, key="value")
-        result = await bot.send(event, "test", key="value")
-        assert ctx.wait_list.empty()
-        assert result == "result"
-
-
-@pytest.mark.asyncio
 async def test_fake(app: App):
     class FakeAdapter(Adapter):
         ...
@@ -93,6 +75,31 @@ async def test_fake(app: App):
         adapter = ctx.create_adapter(base=FakeAdapter)
         assert isinstance(adapter, FakeAdapter)
         assert adapter.get_name() == "fake"
-        bot = ctx.create_bot(base=FakeBot, adapter=adapter)
+        bot = ctx.create_bot(base=FakeBot, self_id="test", adapter=adapter)
         assert isinstance(bot, FakeBot)
         assert bot.self_id == "test"
+
+
+@pytest.mark.asyncio
+async def test_got_call(app: App):
+    async with app.test_api() as ctx:
+        adapter = ctx.create_adapter()
+        bot = ctx.create_bot(self_id="test", adapter=adapter)
+        assert "test" in get_bots()
+        api = ctx.should_call_api("test", {"key": "value"}, "result", adapter=adapter)
+        result = await bot.call_api("test", key="value")
+        assert ctx.wait_list.empty()
+        assert result == "result"
+
+    assert "test" not in get_bots()
+
+    async with app.test_api() as ctx:
+        bot = ctx.create_bot(self_id="test")
+        assert "test" in get_bots()
+        event = make_fake_event()()
+        api = ctx.should_call_send(event, "test", "result", bot=bot, key="value")
+        result = await bot.send(event, "test", key="value")
+        assert ctx.wait_list.empty()
+        assert result == "result"
+
+    assert "test" not in get_bots()

@@ -1,5 +1,5 @@
 from queue import Queue
-from typing import Any, Dict, Type, Union, Optional
+from typing import Any, Set, Dict, Type, Union, Optional
 
 import pytest
 from nonebot import get_driver
@@ -12,9 +12,23 @@ from .fake import make_fake_bot, make_fake_adapter
 
 
 class ApiContext(Context):
+    """API testing context.
+
+    This context is used to test the api calling behavior of the bot.
+    You may inherit this class to make api testing available in other context.
+
+    Note:
+        API testing need to create new bots from `ApiContext.create_bot` or
+        patch existing bots with `ApiContext.mock_bot`.
+
+        Bot created from `ApiContext.create_bot` will be automatically connected
+        to nonebot driver, and disconnected when the context is exited.
+    """
+
     def __init__(self, app: BaseApp, *args, **kwargs):
         super().__init__(app, *args, **kwargs)
         self.wait_list: Queue[Model] = Queue()
+        self.connected_bot: Set[Bot] = set()
 
     def create_adapter(
         self,
@@ -33,7 +47,13 @@ class ApiContext(Context):
         **kwargs: Any,
     ) -> Bot:
         adapter = adapter or make_fake_adapter()(get_driver(), self)
-        return make_fake_bot(base=base)(adapter, self_id, **kwargs)
+        bot = make_fake_bot(base=base)(adapter, self_id, **kwargs)
+        self._connect_bot(bot)
+        return bot
+
+    def _connect_bot(self, bot: Bot) -> None:
+        get_driver()._bot_connect(bot)
+        self.connected_bot.add(bot)
 
     def mock_adapter(self, monkeypatch: pytest.MonkeyPatch, adapter: Adapter) -> None:
         new_adapter = self.create_adapter()
@@ -120,6 +140,16 @@ class ApiContext(Context):
                 model.bot == bot
             ), f"Application got send call with bot {bot} but expected {model.bot}"
         return model.result
+
+    async def cleanup(self) -> None:
+        assert (
+            self.wait_list.empty()
+        ), f"Application has {self.wait_list.qsize()} api/send call(s) not called"
+
+        while self.connected_bot:
+            bot = self.connected_bot.pop()
+            get_driver()._bot_disconnect(bot)
+        return await super().cleanup()
 
 
 class CallApiMixin(BaseApp):
