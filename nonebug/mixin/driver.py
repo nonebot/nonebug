@@ -1,64 +1,15 @@
-from functools import wraps
 from typing_extensions import final
-from typing import TypeVar, Optional
 
-import pytest
-import nonebot
-from nonebot.adapters import Bot
 from asgiref.typing import ASGIApplication
 from async_asgi_testclient import TestClient
 
-from nonebug.base import BaseApp
+from nonebug.base import BaseApp, Context
 
 from .call_api import ApiContext
 
-DC = TypeVar("DC", bound="DriverContext")
-
-
-class DriverContext(ApiContext):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.ctx = pytest.MonkeyPatch.context()
-        self.m: Optional[pytest.MonkeyPatch] = None
-
-    @property
-    def monkeypatch(self) -> pytest.MonkeyPatch:
-        if not self.m:
-            raise RuntimeError("Monkeypatch only available in test context")
-        return self.m
-
-    async def __aenter__(self: DC) -> DC:
-        self.m = self.ctx.__enter__()
-        self.prepare_adapter()
-        self.prepare_bot()
-        return await super().__aenter__()
-
-    def prepare_adapter(self):
-        driver = nonebot.get_driver()
-        for adapter in driver._adapters.values():
-            self.mock_adapter(self.monkeypatch, adapter)
-
-    def prepare_bot(self):
-        driver = nonebot.get_driver()
-        origin = driver._bot_connect
-
-        if not hasattr(origin, "__wrapped__"):
-
-            @wraps(origin)
-            def _mocked_bot_connect(bot: Bot):
-                self.mock_bot(self.monkeypatch, bot)
-                origin(bot)
-
-            self.monkeypatch.setattr(driver, "_bot_connect", _mocked_bot_connect)
-
-    async def run_test(self):
-        await super().run_test()
-        self.ctx.__exit__(None, None, None)
-        self.m = None
-
 
 @final
-class ServerContext(DriverContext):
+class ServerContext(Context):
     def __init__(
         self,
         app: BaseApp,
@@ -83,7 +34,7 @@ class ServerContext(DriverContext):
 
 
 # @final
-# class ClientContext(DriverContext):
+# class ClientContext(Context):
 #     def __init__(
 #         self,
 #         app: BaseApp,

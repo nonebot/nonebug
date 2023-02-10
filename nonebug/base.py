@@ -1,4 +1,6 @@
+import contextlib
 from typing import Optional
+from typing_extensions import Self
 
 from nonebot.matcher import matchers
 
@@ -12,24 +14,25 @@ class Context:
             raise RuntimeError("Another test context is actived")
         self.app.context = self
 
-    async def __aenter__(self):
+        self.stack = contextlib.AsyncExitStack()
+
+    async def __aenter__(self) -> Self:
+        await self.stack.__aenter__()
+        await self.setup()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.run()
+        try:
+            await self.run()
+        finally:
+            await self.stack.__aexit__(exc_type, exc_val, exc_tb)
+            self.app.context = None
 
-    async def run_test(self) -> None:
-        pass
-
-    async def cleanup(self) -> None:
+    async def setup(self) -> None:
         pass
 
     async def run(self) -> None:
-        try:
-            await self.run_test()
-            await self.cleanup()
-        finally:
-            self.app.context = None
+        pass
 
 
 class BaseApp:

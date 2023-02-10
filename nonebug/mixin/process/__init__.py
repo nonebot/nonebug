@@ -1,8 +1,10 @@
+from collections import defaultdict
 from typing_extensions import final
-from contextlib import AsyncExitStack, suppress
-from typing import TYPE_CHECKING, List, Type, Optional
+from typing import Dict, List, Type, Union, Optional
 
-import pytest
+from nonebot.typing import T_State
+from nonebot.matcher import Matcher
+from nonebot.adapters import Bot, Event
 
 from nonebug.base import BaseApp
 
@@ -21,22 +23,22 @@ from .model import (
     PermissionNotPass,
 )
 
-if TYPE_CHECKING:
-    from nonebot.matcher import Matcher
-    from nonebot.adapters import Bot, Event
-    from nonebot.typing import T_State, T_DependencyCache
-
 
 @final
 class MatcherContext(ApiContext):
-    def __init__(self, app: "ProcessMixin", *args, matcher: Type["Matcher"], **kwargs):
+    def __init__(
+        self,
+        app: "ProcessMixin",
+        *args,
+        matchers: Optional[Dict[int, List[Type[Matcher]]]],
+        **kwargs,
+    ):
         super(MatcherContext, self).__init__(app, *args, **kwargs)
-        self.matcher_class = matcher
-        self.matcher = matcher()
+        self.matchers = matchers
         self.action_list: List[Model] = []
 
     def receive_event(
-        self, bot: "Bot", event: "Event", state: Optional["T_State"] = None
+        self, bot: Bot, event: Event, state: Optional[T_State] = None
     ) -> ReceiveEvent:
         receive_event = ReceiveEvent(bot, event, state or {})
         self.action_list.append(receive_event)
@@ -87,156 +89,25 @@ class MatcherContext(ApiContext):
         self.action_list.append(finished)
         return finished
 
-    async def run_test(self):
-        from nonebot.rule import Rule, TrieRule
-        from nonebot.matcher import current_handler
-        from nonebot.exception import (
-            PausedException,
-            FinishedException,
-            RejectedException,
-        )
+    async def setup(self) -> None:
+        await super().setup()
+        self.stack.enter_context(self.app.provider.context(self.matchers))
 
-        with pytest.MonkeyPatch.context() as m:
-            while self.action_list:
-                # prepare for next event
-                stack = AsyncExitStack()
-                dependency_cache: T_DependencyCache = {}
-                # fake event received
-                receive_event = self.action_list.pop(0)
-                assert isinstance(
-                    receive_event, ReceiveEvent
-                ), f"Unexpected model {receive_event} expected ReceiveEvent"
-                assert (
-                    self.matcher.handlers
-                ), f"Matcher has no handler remain, but received event {receive_event}"
-
-                # trie preprocess
-                with suppress(Exception):
-                    TrieRule.get_value(
-                        receive_event.bot, receive_event.event, receive_event.state
-                    )
-                async with stack:
-                    # test rule and permission
-                    rule_passed = await self.matcher.check_rule(
-                        bot=receive_event.bot,
-                        event=receive_event.event,
-                        state=receive_event.state,
-                        stack=stack,
-                        dependency_cache=dependency_cache,
-                    )
-                    permission_passed = await self.matcher.check_perm(
-                        bot=receive_event.bot,
-                        event=receive_event.event,
-                        stack=stack,
-                        dependency_cache=dependency_cache,
-                    )
-                    ignore_rule: bool = False
-                    ignore_permission: bool = False
-                    while self.action_list and isinstance(
-                        self.action_list[0],
-                        (
-                            RulePass,
-                            RuleNotPass,
-                            IgnoreRule,
-                            PermissionPass,
-                            PermissionNotPass,
-                            IgnorePermission,
-                        ),
-                    ):
-                        action = self.action_list.pop(0)
-                        if isinstance(action, RulePass):
-                            assert rule_passed, "Rule should be passed"
-                        elif isinstance(action, RuleNotPass):
-                            assert not rule_passed, "Rule should not be passed"
-                        elif isinstance(action, PermissionPass):
-                            assert permission_passed, "Permission should be passed"
-                        elif isinstance(action, PermissionNotPass):
-                            assert (
-                                not permission_passed
-                            ), "Permission should not be passed"
-                        elif isinstance(action, IgnoreRule):
-                            ignore_rule = True
-                        elif isinstance(action, IgnorePermission):
-                            ignore_permission = True
-
-                    if not ignore_rule and not rule_passed:
-                        continue
-                    elif not ignore_permission and not permission_passed:
-                        continue
-
-                    try:
-                        await self.matcher.simple_run(
-                            bot=receive_event.bot,
-                            event=receive_event.event,
-                            state=receive_event.state,
-                            stack=stack,
-                            dependency_cache=dependency_cache,
-                        )
-                    except PausedException:
-                        handler = current_handler.get()
-                        m.setattr(
-                            self.matcher_class,
-                            "type",
-                            await self.matcher.update_type(
-                                bot=receive_event.bot, event=receive_event.event
-                            ),
-                        )
-                        m.setattr(
-                            self.matcher_class,
-                            "permission",
-                            await self.matcher.update_permission(
-                                bot=receive_event.bot, event=receive_event.event
-                            ),
-                        )
-                        m.setattr(self.matcher_class, "rule", Rule())
-                        if not self.action_list or isinstance(
-                            self.action_list[0], ReceiveEvent
-                        ):
-                            continue
-                        paused = self.action_list.pop(0)
-                        assert isinstance(
-                            paused, Paused
-                        ), f"Matcher paused while running handler {handler} but got {paused}"
-                    except RejectedException:
-                        handler = current_handler.get()
-                        await self.matcher.resolve_reject()
-                        m.setattr(
-                            self.matcher_class,
-                            "type",
-                            await self.matcher.update_type(
-                                bot=receive_event.bot, event=receive_event.event
-                            ),
-                        )
-                        m.setattr(
-                            self.matcher_class,
-                            "permission",
-                            await self.matcher.update_permission(
-                                bot=receive_event.bot, event=receive_event.event
-                            ),
-                        )
-                        m.setattr(self.matcher_class, "rule", Rule())
-                        if not self.action_list or isinstance(
-                            self.action_list[0], ReceiveEvent
-                        ):
-                            continue
-                        rejected = self.action_list.pop(0)
-                        assert isinstance(
-                            rejected, Rejected
-                        ), f"Matcher rejected while running handler {handler} but got {rejected}"
-                    except FinishedException:
-                        handler = current_handler.get()
-                        if not self.action_list:
-                            continue
-                        finished = self.action_list.pop(0)
-                        assert isinstance(
-                            finished, Finished
-                        ), f"Matcher finished while running handler {handler} but got {finished}"
-                        assert (
-                            not self.action_list
-                        ), f"Unexpected models {self.action_list}, expected empty after finished"
-                        break
+    async def run(self):
+        ...
 
 
 class ProcessMixin(BaseApp):
-    def test_matcher(self, matcher: Type["Matcher"]) -> MatcherContext:
-        return MatcherContext(self, matcher=matcher)
+    def test_matcher(
+        self,
+        m: Union[Type[Matcher], List[Type[Matcher]], Dict[int, List[Type[Matcher]]]],
+    ) -> MatcherContext:
+        if isinstance(m, list):
+            matchers: Dict[int, List[Type[Matcher]]] = defaultdict(list)
+            for matcher in m:
+                matchers[matcher.priority].append(matcher)
+        elif isinstance(m, dict):
+            matchers = m
+        else:
+            matchers = {m.priority: [m]}
+        return MatcherContext(self, matchers=matchers)

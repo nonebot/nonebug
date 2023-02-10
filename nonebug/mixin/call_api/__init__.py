@@ -1,8 +1,9 @@
+import contextlib
 from queue import Queue
 from typing import Any, Set, Dict, Type, Union, Optional
 
 import pytest
-from nonebot import get_driver
+from nonebot import get_bots, get_driver
 from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
 
 from nonebug.base import BaseApp, Context
@@ -30,6 +31,10 @@ class ApiContext(Context):
         self.wait_list: Queue[Model] = Queue()
         self.connected_bot: Set[Bot] = set()
 
+    def _connect_bot(self, bot: Bot) -> None:
+        get_driver()._bot_connect(bot)
+        self.connected_bot.add(bot)
+
     def create_adapter(
         self,
         *,
@@ -50,10 +55,6 @@ class ApiContext(Context):
         bot = make_fake_bot(base=base)(adapter, self_id, **kwargs)
         self._connect_bot(bot)
         return bot
-
-    def _connect_bot(self, bot: Bot) -> None:
-        get_driver()._bot_connect(bot)
-        self.connected_bot.add(bot)
 
     def mock_adapter(self, monkeypatch: pytest.MonkeyPatch, adapter: Adapter) -> None:
         new_adapter = self.create_adapter()
@@ -141,15 +142,35 @@ class ApiContext(Context):
             ), f"Application got send call with bot {bot} but expected {model.bot}"
         return model.result
 
-    async def cleanup(self) -> None:
+    @contextlib.contextmanager
+    def _prepare(self):
+        with pytest.MonkeyPatch.context() as m:
+            self._prepare_adapters(m)
+            self._prepare_bots(m)
+            try:
+                yield
+            finally:
+                while self.connected_bot:
+                    bot = self.connected_bot.pop()
+                    get_driver()._bot_disconnect(bot)
+
+    def _prepare_adapters(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        for adapter in get_driver()._adapters.values():
+            self.mock_adapter(monkeypatch, adapter)
+
+    def _prepare_bots(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        for bot in get_bots().values():
+            self.mock_bot(monkeypatch, bot)
+
+    async def setup(self):
+        await super().setup()
+        self.stack.enter_context(self._prepare())
+
+    async def run(self) -> None:
+        await super().run()
         assert (
             self.wait_list.empty()
         ), f"Application has {self.wait_list.qsize()} api/send call(s) not called"
-
-        while self.connected_bot:
-            bot = self.connected_bot.pop()
-            get_driver()._bot_disconnect(bot)
-        return await super().cleanup()
 
 
 class CallApiMixin(BaseApp):

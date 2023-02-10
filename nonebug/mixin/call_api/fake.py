@@ -1,5 +1,9 @@
 from typing import TYPE_CHECKING, Any, Type, Union, Optional
 
+from nonebot.drivers import Driver
+from nonebot.typing import overrides
+from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
+
 if TYPE_CHECKING:
     from nonebot.adapters import Bot, Adapter
 
@@ -7,11 +11,7 @@ if TYPE_CHECKING:
 
 
 # fake class should be created every init
-def make_fake_adapter(base: Optional[Type["Adapter"]] = None):
-    from nonebot.drivers import Driver
-    from nonebot.typing import overrides
-    from nonebot.adapters import Bot, Adapter
-
+def make_fake_adapter(base: Optional[Type[Adapter]] = None):
     base = base or Adapter
 
     class FakeAdapter(base):
@@ -32,10 +32,7 @@ def make_fake_adapter(base: Optional[Type["Adapter"]] = None):
     return FakeAdapter
 
 
-def make_fake_bot(base: Optional[Type["Bot"]] = None) -> Type["Bot"]:
-    from nonebot.typing import overrides
-    from nonebot.adapters import Bot, Event, Message, MessageSegment
-
+def make_fake_bot(base: Optional[Type[Bot]] = None) -> Type[Bot]:
     base = base or Bot
 
     class FakeBot(base):
