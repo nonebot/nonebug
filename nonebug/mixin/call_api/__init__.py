@@ -41,7 +41,7 @@ class ApiContext(Context):
         base: Optional[Type[Adapter]] = None,
         **kwargs: Any,
     ) -> Adapter:
-        return make_fake_adapter(base=base)(get_driver(), self, **kwargs)
+        return make_fake_adapter(self, base=base)(get_driver(), **kwargs)
 
     def create_bot(
         self,
@@ -49,11 +49,13 @@ class ApiContext(Context):
         base: Optional[Type[Bot]] = None,
         adapter: Optional[Adapter] = None,
         self_id: str = "test",
+        auto_connect: bool = True,
         **kwargs: Any,
     ) -> Bot:
-        adapter = adapter or make_fake_adapter()(get_driver(), self)
-        bot = make_fake_bot(base=base)(adapter, self_id, **kwargs)
-        self._connect_bot(bot)
+        adapter = adapter or self.create_adapter()
+        bot = make_fake_bot(self, base=base)(adapter, self_id, **kwargs)
+        if auto_connect:
+            self._connect_bot(bot)
         return bot
 
     def mock_adapter(self, monkeypatch: pytest.MonkeyPatch, adapter: Adapter) -> None:
@@ -64,7 +66,7 @@ class ApiContext(Context):
             )
 
     def mock_bot(self, monkeypatch: pytest.MonkeyPatch, bot: Bot) -> None:
-        new_bot = self.create_bot()
+        new_bot = self.create_bot(auto_connect=False)
         for attr in ("ctx", "send"):
             monkeypatch.setattr(bot, attr, getattr(new_bot, attr), raising=False)
 

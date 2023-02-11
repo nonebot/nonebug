@@ -11,15 +11,10 @@ if TYPE_CHECKING:
 
 
 # fake class should be created every init
-def make_fake_adapter(base: Optional[Type[Adapter]] = None):
+def make_fake_adapter(ctx: "ApiContext", base: Optional[Type[Adapter]] = None):
     base = base or Adapter
 
     class FakeAdapter(base):
-        @overrides(base)
-        def __init__(self, driver: Driver, ctx: "ApiContext", **kwargs: Any):
-            super(FakeAdapter, self).__init__(driver, **kwargs)
-            self.ctx = ctx
-
         @classmethod
         @overrides(base)
         def get_name(cls) -> str:
@@ -27,19 +22,15 @@ def make_fake_adapter(base: Optional[Type[Adapter]] = None):
 
         @overrides(base)
         async def _call_api(self, bot: Bot, api: str, **data) -> Any:
-            return self.ctx.got_call_api(self, api, **data)
+            return ctx.got_call_api(self, api, **data)
 
     return FakeAdapter
 
 
-def make_fake_bot(base: Optional[Type[Bot]] = None) -> Type[Bot]:
+def make_fake_bot(ctx: "ApiContext", base: Optional[Type[Bot]] = None) -> Type[Bot]:
     base = base or Bot
 
     class FakeBot(base):
-        @property
-        def ctx(self) -> "ApiContext":
-            return self.adapter.ctx  # type: ignore
-
         @overrides(base)
         async def send(
             self,
@@ -47,6 +38,6 @@ def make_fake_bot(base: Optional[Type[Bot]] = None) -> Type[Bot]:
             message: Union[str, "Message", "MessageSegment"],
             **kwargs,
         ) -> Any:
-            return self.ctx.got_call_send(self, event, message, **kwargs)
+            return ctx.got_call_send(self, event, message, **kwargs)
 
     return FakeBot

@@ -1,9 +1,8 @@
-from typing import TYPE_CHECKING
 from dataclasses import dataclass
+from typing import Type, ClassVar, Optional
 
-if TYPE_CHECKING:
-    from nonebot.typing import T_State
-    from nonebot.adapters import Bot, Event
+from nonebot.matcher import Matcher
+from nonebot.adapters import Bot, Event
 
 
 @dataclass
@@ -13,51 +12,66 @@ class Model:
 
 @dataclass
 class ReceiveEvent(Model):
-    bot: "Bot"
-    event: "Event"
-    state: "T_State"
+    bot: Bot
+    event: Event
 
 
 @dataclass
-class Paused(Model):
+class Action(Model):
+    matcher: Optional[Type[Matcher]] = None
+
+
+@dataclass
+class Paused(Action):
     ...
 
 
 @dataclass
-class Rejected(Model):
+class Rejected(Action):
     ...
 
 
 @dataclass
-class Finished(Model):
+class Finished(Action):
     ...
 
 
 @dataclass
-class RulePass(Model):
-    ...
+class Check(Model):
+    matcher: Optional[Type[Matcher]] = None
+
+    _priority: ClassVar[int]
+
+    @property
+    def priority(self) -> int:
+        return self._priority + 100 * (self.matcher is not None)
 
 
 @dataclass
-class RuleNotPass(Model):
-    ...
+class RulePass(Check):
+    _priority: ClassVar[int] = 1
 
 
 @dataclass
-class IgnoreRule(Model):
-    ...
+class RuleNotPass(Check):
+    _priority: ClassVar[int] = 2
 
 
 @dataclass
-class PermissionPass(Model):
-    ...
+class IgnoreRule(Check):
+    _priority: ClassVar[int] = 3
 
 
 @dataclass
-class PermissionNotPass(Model):
-    ...
+class PermissionPass(Check):
+    _priority: ClassVar[int] = 1
 
 
 @dataclass
-class IgnorePermission(Model):
-    ...
+class PermissionNotPass(Check):
+    _priority: ClassVar[int] = 2
+
+
+@dataclass
+class IgnorePermission(Check):
+    _priority: ClassVar[int] = 3
