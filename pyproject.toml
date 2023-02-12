@@ -57,6 +57,8 @@ extra_standard_library = ["typing_extensions"]
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
+    "def __repr__",
+    "def __str__",
     "if __name__ == .__main__.:",
     "if (typing\\.)?TYPE_CHECKING( is True)?:",
     "@(abc\\.)?abstractmethod",

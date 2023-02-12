@@ -44,12 +44,12 @@ class Check(Model):
 
     @property
     def priority(self) -> int:
-        return self._priority + 100 * (self.matcher is not None)
+        return self._priority + 100 * (self.matcher is None)
 
 
 @dataclass
 class RulePass(Check):
-    _priority: ClassVar[int] = 1
+    _priority: ClassVar[int] = 3
 
 
 @dataclass
@@ -59,12 +59,12 @@ class RuleNotPass(Check):
 
 @dataclass
 class IgnoreRule(Check):
-    _priority: ClassVar[int] = 3
+    _priority: ClassVar[int] = 1
 
 
 @dataclass
 class PermissionPass(Check):
-    _priority: ClassVar[int] = 1
+    _priority: ClassVar[int] = 3
 
 
 @dataclass
@@ -74,4 +74,4 @@ class PermissionNotPass(Check):
 
 @dataclass
 class IgnorePermission(Check):
-    _priority: ClassVar[int] = 3
+    _priority: ClassVar[int] = 1

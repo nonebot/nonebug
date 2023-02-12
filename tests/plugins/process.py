@@ -1,71 +1,36 @@
 from nonebot import on_message
+from nonebot.adapters import Bot
 from nonebot.permission import Permission
 
-test = on_message()
+test = on_message(rule=lambda: True, permission=Permission(lambda: True))
+
+
+@test.handle()
+async def _(bot: Bot):
+    result = await test.send("test_send")
+    assert result == "result"
+    result = await bot.call_api("test", key="value")
+    assert result == "result"
+    await test.pause()
 
 
 @test.handle()
 async def _():
-    ...
+    await test.reject()
 
 
-test_pause = on_message()
+test_not_pass_perm = on_message(rule=lambda: True, permission=Permission(lambda: False))
+test_not_pass_rule = on_message(rule=lambda: False, permission=Permission(lambda: True))
 
 
-@test_pause.handle()
+test_ignore = on_message(rule=lambda: False, permission=Permission(lambda: False))
+
+
+@test_ignore.permission_updater
 async def _():
-    await test_pause.pause()
+    return Permission(lambda: True)
 
 
-@test_pause.handle()
+@test_ignore.got("key", prompt="key")
 async def _():
-    await test_pause.pause()
-
-
-test_reject = on_message()
-
-
-@test_reject.handle()
-async def _():
-    await test_reject.reject()
-
-
-test_finish = on_message()
-
-
-@test_finish.handle()
-async def _():
-    await test_finish.finish("message")
-
-
-test_rule_permission_pass = on_message(
-    rule=lambda: True, permission=Permission(lambda: True)
-)
-
-
-@test_rule_permission_pass.handle()
-async def _():
-    pass
-
-
-test_rule_permission_not_pass = on_message(
-    rule=lambda: False, permission=Permission(lambda: False)
-)
-
-
-@test_rule_permission_not_pass.handle()
-async def _():
-    pass
-
-
-test_monkeypatch = on_message()
-
-
-@test_monkeypatch.permission_updater
-async def _():
-    return Permission(lambda: False)
-
-
-@test_monkeypatch.handle()
-async def _():
-    await test_monkeypatch.reject()
+    await test_ignore.finish("message")

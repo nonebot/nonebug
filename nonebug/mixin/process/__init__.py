@@ -2,7 +2,7 @@ from contextvars import ContextVar
 from collections import defaultdict
 from typing_extensions import final
 from contextlib import contextmanager
-from typing import Dict, List, Type, Tuple, Union, Optional, TypedDict
+from typing import Dict, List, Type, Tuple, Union, Literal, Optional, TypedDict
 
 import pytest
 from nonebot.typing import T_State
@@ -13,7 +13,7 @@ from nonebot.message import handle_event
 from nonebug.base import BaseApp
 from nonebug.mixin.call_api import ApiContext
 
-from .fake import make_fake_matcher
+from .fake import PATCHES, make_fake_default_state
 from .model import (
     Check,
     Action,
@@ -41,6 +41,18 @@ class EventTest(TypedDict):
 
 @final
 class MatcherContext(ApiContext):
+    """Matcher testing context.
+
+    This context is used to test the behavior of matcher(s).
+    You can give specific matchers to test, or test all available matchers.
+
+    Note:
+        API testing is also available in this context.
+
+        The matcher behavior should be defined immediately
+        after the `MatcherContext.receive_event` call.
+    """
+
     def __init__(
         self,
         app: "ProcessMixin",
@@ -89,31 +101,23 @@ class MatcherContext(ApiContext):
             if isinstance(c, (RulePass, RuleNotPass, IgnoreRule))
         ]
         for check in checks:
-            if check.matcher is matcher:
+            if check.matcher is matcher or check.matcher is None:
                 if isinstance(check, RulePass):
-                    assert (
-                        result
-                    ), f"{matcher} should pass rule check when receive {event}"
+                    if not result:
+                        pytest.fail(
+                            f"{matcher} should pass rule check when receive {event}"
+                        )
                 elif isinstance(check, RuleNotPass):
-                    assert (
-                        not result
-                    ), f"{matcher} should not pass rule check when receive {event}"
+                    if result:
+                        pytest.fail(
+                            f"{matcher} should not pass rule check when receive {event}"
+                        )
                 elif isinstance(check, IgnoreRule):
                     result = True
-                checks.remove(check)
-                return result
-            elif check.matcher is None:
-                if isinstance(check, RulePass):
-                    assert (
-                        result
-                    ), f"{matcher} should pass rule check when receive {event}"
-                elif isinstance(check, RuleNotPass):
-                    assert (
-                        not result
-                    ), f"{matcher} should not pass rule check when receive {event}"
-                elif isinstance(check, IgnoreRule):
-                    result = True
-                return result
+
+                if check.matcher is matcher:
+                    context[1]["checks"].remove(check)
+                break
         return result
 
     def should_pass_permission(
@@ -146,85 +150,112 @@ class MatcherContext(ApiContext):
             if isinstance(c, (PermissionPass, PermissionNotPass, IgnorePermission))
         ]
         for check in checks:
-            if check.matcher is matcher:
+            if check.matcher is matcher or check.matcher is None:
                 if isinstance(check, PermissionPass):
-                    assert (
-                        result
-                    ), f"{matcher} should pass permission check when receive {event}"
+                    if not result:
+                        pytest.fail(
+                            f"{matcher} should pass permission check when receive {event}"
+                        )
                 elif isinstance(check, PermissionNotPass):
-                    assert (
-                        not result
-                    ), f"{matcher} should not pass permission check when receive {event}"
+                    if result:
+                        pytest.fail(
+                            f"{matcher} should not pass permission check when receive {event}"
+                        )
                 elif isinstance(check, IgnorePermission):
                     result = True
-                checks.remove(check)
-                break
-            elif check.matcher is None:
-                if isinstance(check, PermissionPass):
-                    assert (
-                        result
-                    ), f"{matcher} should pass permission check when receive {event}"
-                elif isinstance(check, PermissionNotPass):
-                    assert (
-                        not result
-                    ), f"{matcher} should not pass permission check when receive {event}"
-                elif isinstance(check, IgnorePermission):
-                    result = True
+
+                if check.matcher is matcher:
+                    context[1]["checks"].remove(check)
                 break
         return result
 
     def should_paused(self, matcher: Optional[Type[Matcher]] = None) -> Paused:
-        assert all(
-            action.matcher is not matcher
-            for action in self.currect_event_test["actions"]
-        ), f"Should not set action twice for same matcher: {matcher}"
+        if any(
+            action.matcher is matcher for action in self.currect_event_test["actions"]
+        ):
+            pytest.fail(f"Should not set action twice for same matcher: {matcher}")
         paused = Paused(matcher=matcher)
         self.currect_event_test["actions"].append(paused)
         return paused
 
     def should_rejected(self, matcher: Optional[Type[Matcher]] = None) -> Rejected:
-        assert all(
-            action.matcher is not matcher
-            for action in self.currect_event_test["actions"]
-        ), f"Should not set action twice for same matcher: {matcher}"
+        if any(
+            action.matcher is matcher for action in self.currect_event_test["actions"]
+        ):
+            pytest.fail(f"Should not set action twice for same matcher: {matcher}")
         rejected = Rejected(matcher=matcher)
         self.currect_event_test["actions"].append(rejected)
         return rejected
 
     def should_finished(self, matcher: Optional[Type[Matcher]] = None) -> Finished:
-        assert all(
-            action.matcher is not matcher
-            for action in self.currect_event_test["actions"]
-        ), f"Should not set action twice for same matcher: {matcher}"
+        if any(
+            action.matcher is matcher for action in self.currect_event_test["actions"]
+        ):
+            pytest.fail(f"Should not set action twice for same matcher: {matcher}")
         finished = Finished(matcher=matcher)
         self.currect_event_test["actions"].append(finished)
         return finished
 
-    @contextmanager
-    def _prepare(self):
-        with pytest.MonkeyPatch.context():
-            yield
+    def got_action(
+        self, matcher: Type[Matcher], action: Literal["pause", "reject", "finish"]
+    ):
+        context = event_test_context.get()
+        event = context[0]
+        actions = context[1]["actions"]
+        for act in actions:
+            if act.matcher is matcher or act.matcher is None:
+                if isinstance(act, Paused):
+                    if action != "pause":
+                        pytest.fail(f"{matcher} should pause when receive {event}")
+                elif isinstance(act, Rejected):
+                    if action != "reject":
+                        pytest.fail(f"{matcher} should reject when receive {event}")
+                elif isinstance(act, Finished):
+                    if action != "finish":
+                        pytest.fail(f"{matcher} should finish when receive {event}")
 
-    def mock_matcher(self, monkeypatch: pytest.MonkeyPatch):
-        fake_matcher = make_fake_matcher(self)
-        for attr in ("check_perm", "check_rule"):
-            monkeypatch.setattr(Matcher, attr, getattr(fake_matcher, attr))
+                if act.matcher is matcher:
+                    context[1]["actions"].remove(act)
+                break
+
+    @contextmanager
+    def _prepare_matcher_context(self):
+        with self.app.provider.context(self.matchers) as provider:
+            with pytest.MonkeyPatch.context() as m:
+                self.patch_matcher(m, Matcher)
+                for matchers in provider.values():
+                    for matcher in matchers:
+                        m.setattr(
+                            matcher,
+                            "_default_state",
+                            make_fake_default_state(self, matcher),
+                        )
+                yield
+
+    def patch_matcher(self, monkeypatch: pytest.MonkeyPatch, matcher: Type[Matcher]):
+        for attr, patch_func in PATCHES.items():
+            monkeypatch.setattr(matcher, attr, patch_func(self, matcher))
 
     async def setup(self) -> None:
         await super().setup()
-        self.stack.enter_context(self.app.provider.context(self.matchers))
+        self.stack.enter_context(self._prepare_matcher_context())
 
     async def run(self):
         while self.event_list:
             event, context = self.event_list.pop(0)
-            context["checks"].sort(key=lambda x: x.priority, reverse=True)
+            context["checks"].sort(key=lambda x: x.priority)
+            context["actions"].sort(key=lambda x: x.matcher is None)
             t = event_test_context.set((event, context))
             try:
                 await handle_event(bot=event.bot, event=event.event)
 
-                if remain := [c for c in context["checks"] if c.matcher]:
-                    raise AssertionError(
-                        f"Some checks remain after receive event {event}: {remain}"
+                if remain_checks := [c for c in context["checks"] if c.matcher]:
+                    pytest.fail(
+                        f"Some checks remain after receive event {event}: {remain_checks}"
+                    )
+                if remain_actions := [a for a in context["actions"] if a.matcher]:
+                    pytest.fail(
+                        f"Some actions remain after receive event {event}: {remain_actions}"
                     )
             finally:
                 event_test_context.reset(t)
@@ -233,11 +264,16 @@ class MatcherContext(ApiContext):
 class ProcessMixin(BaseApp):
     def test_matcher(
         self,
-        m: Union[Type[Matcher], List[Type[Matcher]], Dict[int, List[Type[Matcher]]]],
+        m: Union[
+            None, Type[Matcher], List[Type[Matcher]], Dict[int, List[Type[Matcher]]]
+        ] = None,
         /,
     ) -> MatcherContext:
-        if isinstance(m, list):
-            matchers: Dict[int, List[Type[Matcher]]] = defaultdict(list)
+        matchers: Optional[Dict[int, List[Type[Matcher]]]]
+        if m is None:
+            matchers = None
+        elif isinstance(m, list):
+            matchers = defaultdict(list)
             for matcher in m:
                 matchers[matcher.priority].append(matcher)
         elif isinstance(m, dict):

@@ -19,10 +19,10 @@ class ApiContext(Context):
     You may inherit this class to make api testing available in other context.
 
     Note:
-        API testing need to create new bots from `ApiContext.create_bot` or
-        patch existing bots with `ApiContext.mock_bot`.
+        API testing needs to create new bots from `ApiContext.create_bot` or
+        patch existing bots with `ApiContext.patch_bot`.
 
-        Bot created from `ApiContext.create_bot` will be automatically connected
+        Bots created from `ApiContext.create_bot` will be automatically connected
         to nonebot driver, and disconnected when the context is exited.
     """
 
@@ -58,17 +58,13 @@ class ApiContext(Context):
             self._connect_bot(bot)
         return bot
 
-    def mock_adapter(self, monkeypatch: pytest.MonkeyPatch, adapter: Adapter) -> None:
+    def patch_adapter(self, monkeypatch: pytest.MonkeyPatch, adapter: Adapter) -> None:
         new_adapter = self.create_adapter()
-        for attr in ("ctx", "_call_api"):
-            monkeypatch.setattr(
-                adapter, attr, getattr(new_adapter, attr), raising=False
-            )
+        monkeypatch.setattr(adapter, "_call_api", getattr(new_adapter, "_call_api"))
 
-    def mock_bot(self, monkeypatch: pytest.MonkeyPatch, bot: Bot) -> None:
+    def patch_bot(self, monkeypatch: pytest.MonkeyPatch, bot: Bot) -> None:
         new_bot = self.create_bot(auto_connect=False)
-        for attr in ("ctx", "send"):
-            monkeypatch.setattr(bot, attr, getattr(new_bot, attr), raising=False)
+        monkeypatch.setattr(bot, "send", getattr(new_bot, "send"))
 
     def should_call_api(
         self,
@@ -96,23 +92,23 @@ class ApiContext(Context):
         return model
 
     def got_call_api(self, adapter: Adapter, api: str, **data: Any) -> Any:
-        assert (
-            not self.wait_list.empty()
-        ), f"Application has no api call but expected api={api} data={data}"
+        if self.wait_list.empty():
+            pytest.fail(
+                f"Application has no api call but expected api={api} data={data}"
+            )
         model = self.wait_list.get()
-        assert isinstance(
-            model, Api
-        ), f"Application got api call {api} but expected {model}"
-        assert (
-            model.name == api
-        ), f"Application got api call {api} but expected {model.name}"
-        assert (
-            model.data == data
-        ), f"Application got api call {api} with data {data} but expected {model.data}"
-        if model.adapter:
-            assert (
-                model.adapter == adapter
-            ), f"Application got api call {api} with adapter {adapter} but expected {model.adapter}"
+        if not isinstance(model, Api):
+            pytest.fail(f"Application got api call {api} but expected {model}")
+        if model.name != api:
+            pytest.fail(f"Application got api call {api} but expected {model.name}")
+        if model.data != data:
+            pytest.fail(
+                f"Application got api call {api} with data {data} but expected {model.data}"
+            )
+        if model.adapter and model.adapter != adapter:
+            pytest.fail(
+                f"Application got api call {api} with adapter {adapter} but expected {model.adapter}"
+            )
         return model.result
 
     def got_call_send(
@@ -122,30 +118,33 @@ class ApiContext(Context):
         message: Union[str, Message, MessageSegment],
         **kwargs: Any,
     ) -> Any:
-        assert (
-            not self.wait_list.empty()
-        ), f"Application has no api call but expected event={event} message={message} kwargs={kwargs}"
+        if self.wait_list.empty():
+            pytest.fail(
+                f"Application has no send call but expected event={event} message={message} kwargs={kwargs}"
+            )
         model = self.wait_list.get()
-        assert isinstance(
-            model, Send
-        ), f"Application got send call but expected {model}"
-        assert (
-            model.event.dict() == event.dict()
-        ), f"Application got send call with event {event} but expected {model.event}"
-        assert (
-            model.message == message
-        ), f"Application got send call with message {message} but expected {model.message}"
-        assert (
-            model.kwargs == kwargs
-        ), f"Application got send call with kwargs {kwargs} but expected {model.kwargs}"
-        if model.bot:
-            assert (
-                model.bot == bot
-            ), f"Application got send call with bot {bot} but expected {model.bot}"
+        if not isinstance(model, Send):
+            pytest.fail(f"Application got send call but expected {model}")
+        if model.event.dict() != event.dict():
+            pytest.fail(
+                f"Application got send call with event {event} but expected {model.event}"
+            )
+        if model.message != message:
+            pytest.fail(
+                f"Application got send call with message {message} but expected {model.message}"
+            )
+        if model.kwargs != kwargs:
+            pytest.fail(
+                f"Application got send call with kwargs {kwargs} but expected {model.kwargs}"
+            )
+        if model.bot and model.bot != bot:
+            pytest.fail(
+                f"Application got send call with bot {bot} but expected {model.bot}"
+            )
         return model.result
 
     @contextlib.contextmanager
-    def _prepare(self):
+    def _prepare_api_context(self):
         with pytest.MonkeyPatch.context() as m:
             self._prepare_adapters(m)
             self._prepare_bots(m)
@@ -158,21 +157,22 @@ class ApiContext(Context):
 
     def _prepare_adapters(self, monkeypatch: pytest.MonkeyPatch) -> None:
         for adapter in get_driver()._adapters.values():
-            self.mock_adapter(monkeypatch, adapter)
+            self.patch_adapter(monkeypatch, adapter)
 
     def _prepare_bots(self, monkeypatch: pytest.MonkeyPatch) -> None:
         for bot in get_bots().values():
-            self.mock_bot(monkeypatch, bot)
+            self.patch_bot(monkeypatch, bot)
 
     async def setup(self):
         await super().setup()
-        self.stack.enter_context(self._prepare())
+        self.stack.enter_context(self._prepare_api_context())
 
     async def run(self) -> None:
         await super().run()
-        assert (
-            self.wait_list.empty()
-        ), f"Application has {self.wait_list.qsize()} api/send call(s) not called"
+        if not self.wait_list.empty():
+            pytest.fail(
+                f"Application has {self.wait_list.qsize()} api/send call(s) not called"
+            )
 
 
 class CallApiMixin(BaseApp):

@@ -4,7 +4,6 @@ from utils import make_fake_event
 from nonebot.adapters import Bot, Adapter
 
 from nonebug import App
-from nonebug.fixture import *
 
 
 @pytest.mark.asyncio

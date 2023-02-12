@@ -38,6 +38,6 @@ class Context:
 class BaseApp:
     def __init__(self):
         self.context: Optional[Context] = None
-        if not isinstance(matchers.provider, NoneBugProvider):
+        if not isinstance(matchers.provider, NoneBugProvider):  # pragma: no cover
             raise RuntimeError("NoneBug is not initialized")
         self.provider = matchers.provider
