@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
 <p align="center">
-  <a href="https://v2.nonebot.dev/"><img src="https://v2.nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
+  <a href="https://v2.nonebot.dev/"><img src="https://github.com/nonebot/nonebug/raw/master/assets/logo.png" width="200" height="200" alt="nonebot"></a>
 </p>
 
 <div align="center">
@@ -22,7 +22,7 @@ _✨ NoneBot2 测试框架 ✨_
   <a href="https://pypi.python.org/pypi/nonebug">
     <img src="https://img.shields.io/pypi/v/nonebug" alt="pypi">
   </a>
-  <img src="https://img.shields.io/badge/python-3.7.3+-blue" alt="python">
+  <img src="https://img.shields.io/badge/python-3.8+-blue" alt="python">
   <a href="https://codecov.io/gh/nonebot/nonebug">
     <img src="https://codecov.io/gh/nonebot/nonebug/branch/master/graph/badge.svg?token=LDK2OFR231"/>
   </a>
