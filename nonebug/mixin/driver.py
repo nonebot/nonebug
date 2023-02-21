@@ -1,3 +1,4 @@
+from typing import Optional
 from typing_extensions import final
 
 import nonebot
@@ -47,8 +48,8 @@ class ServerContext(Context):
 
 
 class DriverMixin(BaseApp):
-    def test_server(self) -> ServerContext:
-        asgi = nonebot.get_asgi()
+    def test_server(self, asgi: Optional[ASGIApplication] = None) -> ServerContext:
+        asgi = asgi or nonebot.get_asgi()
         return ServerContext(self, asgi=asgi)
 
     # def test_client(self):
