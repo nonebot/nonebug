@@ -5,6 +5,8 @@ from nonebot.matcher import matchers
 from nonebug.app import App
 from nonebug.provider import NoneBugProvider
 
+from . import NONEBOT_INIT_KWARGS
+
 
 @pytest.fixture(scope="session", autouse=True)
 def nonebug_init(request: pytest.FixtureRequest) -> None:
@@ -12,7 +14,7 @@ def nonebug_init(request: pytest.FixtureRequest) -> None:
     Initialize nonebot before test case running.
     """
 
-    nonebot.init(**getattr(request, "param", {}))
+    nonebot.init(**request.config.stash.get(NONEBOT_INIT_KWARGS, {}))
     matchers.set_provider(NoneBugProvider)
 
 

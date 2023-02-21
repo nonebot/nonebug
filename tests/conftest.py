@@ -5,7 +5,12 @@ import pytest
 import nonebot
 from nonebot.plugin import Plugin
 
+from nonebug import NONEBOT_INIT_KWARGS
 from nonebug.fixture import *
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    config.stash[NONEBOT_INIT_KWARGS] = {"custom_key": "custom_value"}
 
 
 @pytest.fixture(scope="session")
