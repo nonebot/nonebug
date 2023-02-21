@@ -1,5 +1,5 @@
-from .mixin import DriverMixin, CallApiMixin, ProcessMixin
+from .mixin import DriverMixin, CallApiMixin, ProcessMixin, DependentMixin
 
 
-class App(CallApiMixin, ProcessMixin, DriverMixin):
+class App(DependentMixin, ProcessMixin, CallApiMixin, DriverMixin):
     ...
