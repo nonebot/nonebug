@@ -6,7 +6,7 @@ from nonebug.app import App
 from nonebug.provider import NoneBugProvider
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def nonebug_init(request: pytest.FixtureRequest) -> None:
     """
     Initialize nonebot before test case running.
