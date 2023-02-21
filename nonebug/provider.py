@@ -52,7 +52,7 @@ class NoneBugProvider(MatcherProvider):
         del self._matchers[key]
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, NoneBugProvider) and self._matchers == other._matchers
+        return self._matchers == other
 
     def keys(self) -> KeysView[int]:
         return self._matchers.keys()
