@@ -1,23 +1,15 @@
 from typing_extensions import final
 from contextlib import AsyncExitStack
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Type,
-    Union,
-    Callable,
-    Iterable,
-    Optional,
-)
+from typing import TYPE_CHECKING, Any, Dict, Type, Union, Callable, Iterable, Optional
 
 import pytest
-from nonebot.dependencies import Param, Dependent
 
 from nonebug.base import BaseApp
 
 from .call_api import ApiContext
+
+if TYPE_CHECKING:
+    from nonebot.dependencies import Param, Dependent
 
 
 @final
@@ -26,7 +18,7 @@ class DependentContext(ApiContext):
         self,
         app: "DependentMixin",
         *args,
-        dependent: Dependent,
+        dependent: "Dependent",
         **kwargs,
     ):
         super(DependentContext, self).__init__(app, *args, **kwargs)
@@ -52,10 +44,12 @@ class DependentContext(ApiContext):
 class DependentMixin(BaseApp):
     def test_dependent(
         self,
-        dependent: Union[Dependent, Callable[..., Any]],
-        allow_types: Optional[Iterable[Type[Param]]] = None,
+        dependent: Union["Dependent", Callable[..., Any]],
+        allow_types: Optional[Iterable[Type["Param"]]] = None,
         parameterless: Optional[Iterable[Any]] = None,
     ) -> DependentContext:
+        from nonebot.dependencies import Dependent
+
         if not isinstance(dependent, Dependent):
             dependent = Dependent[Any].parse(
                 call=dependent,

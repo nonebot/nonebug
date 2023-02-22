@@ -2,13 +2,19 @@ from contextvars import ContextVar
 from collections import defaultdict
 from typing_extensions import final
 from contextlib import contextmanager
-from typing import Dict, List, Type, Tuple, Union, Literal, Optional, TypedDict
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    List,
+    Type,
+    Tuple,
+    Union,
+    Literal,
+    Optional,
+    TypedDict,
+)
 
 import pytest
-from nonebot.typing import T_State
-from nonebot.matcher import Matcher
-from nonebot.adapters import Bot, Event
-from nonebot.message import handle_event
 
 from nonebug.base import BaseApp
 from nonebug.mixin.call_api import ApiContext
@@ -28,6 +34,10 @@ from .model import (
     IgnorePermission,
     PermissionNotPass,
 )
+
+if TYPE_CHECKING:
+    from nonebot.matcher import Matcher
+    from nonebot.adapters import Bot, Event
 
 event_test_context: ContextVar[Tuple[ReceiveEvent, "EventTest"]] = ContextVar(
     "event_test_context"
@@ -57,7 +67,7 @@ class MatcherContext(ApiContext):
         self,
         app: "ProcessMixin",
         *args,
-        matchers: Optional[Dict[int, List[Type[Matcher]]]],
+        matchers: Optional[Dict[int, List[Type["Matcher"]]]],
         **kwargs,
     ):
         super(MatcherContext, self).__init__(app, *args, **kwargs)
@@ -70,29 +80,31 @@ class MatcherContext(ApiContext):
             raise RuntimeError("Please call receive_event first")
         return self.event_list[-1][1]
 
-    def receive_event(self, bot: Bot, event: Event) -> ReceiveEvent:
+    def receive_event(self, bot: "Bot", event: "Event") -> ReceiveEvent:
         receive_event = ReceiveEvent(bot, event)
         self.event_list.append((receive_event, EventTest(checks=[], actions=[])))
         return receive_event
 
-    def should_pass_rule(self, matcher: Optional[Type[Matcher]] = None) -> RulePass:
+    def should_pass_rule(self, matcher: Optional[Type["Matcher"]] = None) -> RulePass:
         rule = RulePass(matcher=matcher)
         self.currect_event_test["checks"].append(rule)
         return rule
 
     def should_not_pass_rule(
-        self, matcher: Optional[Type[Matcher]] = None
+        self, matcher: Optional[Type["Matcher"]] = None
     ) -> RuleNotPass:
         rule = RuleNotPass(matcher=matcher)
         self.currect_event_test["checks"].append(rule)
         return rule
 
-    def should_ignore_rule(self, matcher: Optional[Type[Matcher]] = None) -> IgnoreRule:
+    def should_ignore_rule(
+        self, matcher: Optional[Type["Matcher"]] = None
+    ) -> IgnoreRule:
         rule = IgnoreRule(matcher=matcher)
         self.currect_event_test["checks"].append(rule)
         return rule
 
-    def got_check_rule(self, matcher: Type[Matcher], result: bool) -> bool:
+    def got_check_rule(self, matcher: Type["Matcher"], result: bool) -> bool:
         context = event_test_context.get()
         event = context[0]
         checks = [
@@ -121,27 +133,27 @@ class MatcherContext(ApiContext):
         return result
 
     def should_pass_permission(
-        self, matcher: Optional[Type[Matcher]] = None
+        self, matcher: Optional[Type["Matcher"]] = None
     ) -> PermissionPass:
         permission = PermissionPass(matcher=matcher)
         self.currect_event_test["checks"].append(permission)
         return permission
 
     def should_not_pass_permission(
-        self, matcher: Optional[Type[Matcher]] = None
+        self, matcher: Optional[Type["Matcher"]] = None
     ) -> PermissionNotPass:
         permission = PermissionNotPass(matcher=matcher)
         self.currect_event_test["checks"].append(permission)
         return permission
 
     def should_ignore_permission(
-        self, matcher: Optional[Type[Matcher]] = None
+        self, matcher: Optional[Type["Matcher"]] = None
     ) -> IgnorePermission:
         permission = IgnorePermission(matcher=matcher)
         self.currect_event_test["checks"].append(permission)
         return permission
 
-    def got_check_permission(self, matcher: Type[Matcher], result: bool) -> bool:
+    def got_check_permission(self, matcher: Type["Matcher"], result: bool) -> bool:
         context = event_test_context.get()
         event = context[0]
         checks = [
@@ -169,7 +181,7 @@ class MatcherContext(ApiContext):
                 break
         return result
 
-    def should_paused(self, matcher: Optional[Type[Matcher]] = None) -> Paused:
+    def should_paused(self, matcher: Optional[Type["Matcher"]] = None) -> Paused:
         if any(
             action.matcher is matcher for action in self.currect_event_test["actions"]
         ):
@@ -178,7 +190,7 @@ class MatcherContext(ApiContext):
         self.currect_event_test["actions"].append(paused)
         return paused
 
-    def should_rejected(self, matcher: Optional[Type[Matcher]] = None) -> Rejected:
+    def should_rejected(self, matcher: Optional[Type["Matcher"]] = None) -> Rejected:
         if any(
             action.matcher is matcher for action in self.currect_event_test["actions"]
         ):
@@ -187,7 +199,7 @@ class MatcherContext(ApiContext):
         self.currect_event_test["actions"].append(rejected)
         return rejected
 
-    def should_finished(self, matcher: Optional[Type[Matcher]] = None) -> Finished:
+    def should_finished(self, matcher: Optional[Type["Matcher"]] = None) -> Finished:
         if any(
             action.matcher is matcher for action in self.currect_event_test["actions"]
         ):
@@ -197,7 +209,7 @@ class MatcherContext(ApiContext):
         return finished
 
     def got_action(
-        self, matcher: Type[Matcher], action: Literal["pause", "reject", "finish"]
+        self, matcher: Type["Matcher"], action: Literal["pause", "reject", "finish"]
     ):
         context = event_test_context.get()
         event = context[0]
@@ -220,6 +232,8 @@ class MatcherContext(ApiContext):
 
     @contextmanager
     def _prepare_matcher_context(self):
+        from nonebot.matcher import Matcher
+
         with self.app.provider.context(self.matchers) as provider:
             with pytest.MonkeyPatch.context() as m:
                 self.patch_matcher(m, Matcher)
@@ -232,7 +246,7 @@ class MatcherContext(ApiContext):
                         )
                 yield
 
-    def patch_matcher(self, monkeypatch: pytest.MonkeyPatch, matcher: Type[Matcher]):
+    def patch_matcher(self, monkeypatch: pytest.MonkeyPatch, matcher: Type["Matcher"]):
         for attr, patch_func in PATCHES.items():
             monkeypatch.setattr(matcher, attr, patch_func(self, matcher))
 
@@ -241,6 +255,8 @@ class MatcherContext(ApiContext):
         self.stack.enter_context(self._prepare_matcher_context())
 
     async def run(self):
+        from nonebot.message import handle_event
+
         while self.event_list:
             event, context = self.event_list.pop(0)
             context["checks"].sort(key=lambda x: x.priority)
@@ -265,11 +281,14 @@ class ProcessMixin(BaseApp):
     def test_matcher(
         self,
         m: Union[
-            None, Type[Matcher], List[Type[Matcher]], Dict[int, List[Type[Matcher]]]
+            None,
+            Type["Matcher"],
+            List[Type["Matcher"]],
+            Dict[int, List[Type["Matcher"]]],
         ] = None,
         /,
     ) -> MatcherContext:
-        matchers: Optional[Dict[int, List[Type[Matcher]]]]
+        matchers: Optional[Dict[int, List[Type["Matcher"]]]]
         if m is None:
             matchers = None
         elif isinstance(m, list):

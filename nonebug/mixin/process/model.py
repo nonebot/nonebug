@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from typing import Type, ClassVar, Optional
+from typing import TYPE_CHECKING, Type, ClassVar, Optional
 
-from nonebot.matcher import Matcher
-from nonebot.adapters import Bot, Event
+if TYPE_CHECKING:
+    from nonebot.matcher import Matcher
+    from nonebot.adapters import Bot, Event
 
 
 @dataclass
@@ -12,13 +13,13 @@ class Model:
 
 @dataclass
 class ReceiveEvent(Model):
-    bot: Bot
-    event: Event
+    bot: "Bot"
+    event: "Event"
 
 
 @dataclass
 class Action(Model):
-    matcher: Optional[Type[Matcher]] = None
+    matcher: Optional[Type["Matcher"]] = None
 
 
 @dataclass
@@ -38,7 +39,7 @@ class Finished(Action):
 
 @dataclass
 class Check(Model):
-    matcher: Optional[Type[Matcher]] = None
+    matcher: Optional[Type["Matcher"]] = None
 
     _priority: ClassVar[int]
 

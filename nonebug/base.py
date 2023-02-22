@@ -2,10 +2,6 @@ import contextlib
 from typing import Optional
 from typing_extensions import Self
 
-from nonebot.matcher import matchers
-
-from .provider import NoneBugProvider
-
 
 class Context:
     def __init__(self, app: "BaseApp", *args, **kwargs):
@@ -37,6 +33,10 @@ class Context:
 
 class BaseApp:
     def __init__(self):
+        from nonebot.matcher import matchers
+
+        from .provider import NoneBugProvider
+
         self.context: Optional[Context] = None
         if not isinstance(matchers.provider, NoneBugProvider):  # pragma: no cover
             raise RuntimeError("NoneBug is not initialized")

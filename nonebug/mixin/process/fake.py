@@ -1,25 +1,24 @@
 from typing import TYPE_CHECKING, Type, Callable, Awaitable
 
-from nonebot.typing import T_State
-from nonebot.matcher import Matcher
-from nonebot.adapters import Bot, Event
-from nonebot.exception import PausedException, FinishedException, RejectedException
-
 if TYPE_CHECKING:
+    from nonebot.typing import T_State
+    from nonebot.matcher import Matcher
+    from nonebot.adapters import Bot, Event
+
     from . import MatcherContext
 
 
-def make_fake_default_state(ctx: "MatcherContext", matcher: Type[Matcher]) -> dict:
+def make_fake_default_state(ctx: "MatcherContext", matcher: Type["Matcher"]) -> dict:
     return {**matcher._default_state, "__nonebug_matcher__": matcher}
 
 
 def make_fake_check_perm(
-    ctx: "MatcherContext", matcher: Type[Matcher]
+    ctx: "MatcherContext", matcher: Type["Matcher"]
 ) -> Callable[..., Awaitable[bool]]:
     check_perm = matcher.__dict__["check_perm"]
 
     @classmethod
-    async def fake_check_perm(cls: Type[Matcher], *args, **kwargs) -> bool:
+    async def fake_check_perm(cls: Type["Matcher"], *args, **kwargs) -> bool:
         result = await check_perm.__get__(None, cls)(*args, **kwargs)
         return ctx.got_check_permission(
             cls._default_state["__nonebug_matcher__"], result
@@ -29,12 +28,12 @@ def make_fake_check_perm(
 
 
 def make_fake_check_rule(
-    ctx: "MatcherContext", matcher: Type[Matcher]
+    ctx: "MatcherContext", matcher: Type["Matcher"]
 ) -> Callable[..., Awaitable[bool]]:
     check_rule = matcher.__dict__["check_rule"]
 
     @classmethod
-    async def fake_check_rule(cls: Type[Matcher], *args, **kwargs) -> bool:
+    async def fake_check_rule(cls: Type["Matcher"], *args, **kwargs) -> bool:
         result = await check_rule.__get__(None, cls)(*args, **kwargs)
         return ctx.got_check_rule(cls._default_state["__nonebug_matcher__"], result)
 
@@ -42,13 +41,19 @@ def make_fake_check_rule(
 
 
 def make_fake_simple_run(
-    ctx: "MatcherContext", matcher: Type[Matcher]
+    ctx: "MatcherContext", matcher: Type["Matcher"]
 ) -> Callable[..., Awaitable[None]]:
     simple_run = matcher.simple_run
 
     async def fake_simple_run(
-        self: Matcher, bot: Bot, event: Event, state: T_State, *args, **kwargs
+        self: "Matcher", bot: "Bot", event: "Event", state: "T_State", *args, **kwargs
     ) -> None:
+        from nonebot.exception import (
+            PausedException,
+            FinishedException,
+            RejectedException,
+        )
+
         try:
             await simple_run(self, bot, event, state, *args, **kwargs)
         except RejectedException:

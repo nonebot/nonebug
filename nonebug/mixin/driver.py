@@ -1,7 +1,6 @@
 from typing import Optional
 from typing_extensions import final
 
-import nonebot
 from asgiref.typing import ASGIApplication
 from async_asgi_testclient import TestClient
 
@@ -49,6 +48,8 @@ class ServerContext(Context):
 
 class DriverMixin(BaseApp):
     def test_server(self, asgi: Optional[ASGIApplication] = None) -> ServerContext:
+        import nonebot
+
         asgi = asgi or nonebot.get_asgi()
         return ServerContext(self, asgi=asgi)
 
