@@ -1,4 +1,10 @@
-from typing import TYPE_CHECKING, Type, Callable, Awaitable
+from functools import wraps
+from typing_extensions import ParamSpec
+from typing import TYPE_CHECKING, Type, Callable, Awaitable, cast
+
+from _pytest.outcomes import Failed
+
+from .model import Error
 
 if TYPE_CHECKING:
     from nonebot.typing import T_State
@@ -6,6 +12,23 @@ if TYPE_CHECKING:
     from nonebot.adapters import Bot, Event
 
     from . import MatcherContext
+
+P = ParamSpec("P")
+
+
+def make_fake_check_matcher(
+    ctx: "MatcherContext", check_func: Callable[P, Awaitable[None]]
+) -> Callable[P, Awaitable[None]]:
+    @wraps(check_func)
+    async def _check_matcher(*args: P.args, **kwargs: P.kwargs):
+        matcher_type = cast(Type["Matcher"], kwargs.get("matcher") or args[0])
+        try:
+            await check_func(*args, **kwargs)
+        except Failed as e:
+            ctx.errors.append(Error(matcher_type, str(e)))
+            raise
+
+    return _check_matcher
 
 
 def make_fake_default_state(ctx: "MatcherContext", matcher: Type["Matcher"]) -> dict:

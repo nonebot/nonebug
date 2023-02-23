@@ -1,14 +1,11 @@
-from typing import Set
-
 import pytest
-from nonebot.plugin import Plugin
 from utils import make_fake_event
 
 from nonebug import App
 
 
 @pytest.mark.asyncio
-async def test_process(app: App, load_plugin: Set[Plugin]):
+async def test_process(app: App):
     from tests.plugins.process import (
         test,
         test_ignore,
@@ -66,3 +63,18 @@ async def test_process(app: App, load_plugin: Set[Plugin]):
 
         ctx.should_call_send(event, "message", "result", bot=bot)
         ctx.should_finished()
+
+
+@pytest.mark.asyncio
+@pytest.mark.xfail(strict=True)
+async def test_error(app: App):
+    from tests.plugins.process import test_error
+
+    async with app.test_matcher(test_error) as ctx:
+        adapter = ctx.create_adapter()
+        bot = ctx.create_bot(adapter=adapter)
+
+        event = make_fake_event()()
+        ctx.receive_event(bot, event)
+
+        ctx.should_call_send(event, "uncorrect", "result", bot=bot)

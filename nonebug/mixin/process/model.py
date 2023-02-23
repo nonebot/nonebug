@@ -76,3 +76,9 @@ class PermissionNotPass(Check):
 @dataclass
 class IgnorePermission(Check):
     _priority: ClassVar[int] = 1
+
+
+@dataclass
+class Error:
+    matcher: Type["Matcher"]
+    reason: str

@@ -31,8 +31,8 @@ async def test_dependent(app: App):
     assert e.value.value is event
 
 
-@pytest.mark.xfail
 @pytest.mark.asyncio
+@pytest.mark.xfail(strict=True)
 async def test_should_fail(app: App):
     def _handle_return():
         return True

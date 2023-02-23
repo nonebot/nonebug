@@ -12,6 +12,9 @@ if TYPE_CHECKING:
     from nonebot.dependencies import Param, Dependent
 
 
+UNSET = object()
+
+
 @final
 class DependentContext(ApiContext):
     def __init__(
@@ -35,7 +38,9 @@ class DependentContext(ApiContext):
         stack = AsyncExitStack()
         async with stack:
             result = await self.dependent(stack=stack, **self.kwargs)
-            if (expected := getattr(self, "result", None)) and result != expected:
+            if (
+                expected := getattr(self, "result", UNSET)
+            ) is not UNSET and result != expected:
                 pytest.fail(
                     f"Dependent got return value {result!r} but expected {expected!r}"
                 )

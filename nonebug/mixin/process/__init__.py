@@ -19,7 +19,7 @@ import pytest
 from nonebug.base import BaseApp
 from nonebug.mixin.call_api import ApiContext
 
-from .fake import PATCHES, make_fake_default_state
+from .fake import PATCHES, make_fake_check_matcher, make_fake_default_state
 from .model import (
     Check,
     Action,
@@ -73,6 +73,7 @@ class MatcherContext(ApiContext):
         super(MatcherContext, self).__init__(app, *args, **kwargs)
         self.matchers = matchers
         self.event_list: List[Tuple[ReceiveEvent, EventTest]] = []
+        self.errors = []
 
     @property
     def currect_event_test(self) -> EventTest:
@@ -232,10 +233,16 @@ class MatcherContext(ApiContext):
 
     @contextmanager
     def _prepare_matcher_context(self):
+        import nonebot.message
         from nonebot.matcher import Matcher
 
         with self.app.provider.context(self.matchers) as provider:
             with pytest.MonkeyPatch.context() as m:
+                m.setattr(
+                    nonebot.message,
+                    "_check_matcher",
+                    make_fake_check_matcher(self, nonebot.message._check_matcher),
+                )
                 self.patch_matcher(m, Matcher)
                 for matchers in provider.values():
                     for matcher in matchers:
@@ -265,6 +272,10 @@ class MatcherContext(ApiContext):
             try:
                 await handle_event(bot=event.bot, event=event.event)
 
+                if self.errors:
+                    pytest.fail(
+                        f"Some checks failed when handling event {event}: {self.errors}"
+                    )
                 if remain_checks := [c for c in context["checks"] if c.matcher]:
                     pytest.fail(
                         f"Some checks remain after receive event {event}: {remain_checks}"
@@ -274,6 +285,7 @@ class MatcherContext(ApiContext):
                         f"Some actions remain after receive event {event}: {remain_actions}"
                     )
             finally:
+                self.errors.clear()
                 event_test_context.reset(t)
 
 
