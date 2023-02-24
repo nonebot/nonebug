@@ -24,7 +24,7 @@ from nonebot.matcher import Matcher, MatcherProvider
 T = TypeVar("T")
 
 
-class NoneBugProvider(MatcherProvider):
+class NoneBugProvider(MatcherProvider):  # pragma: no cover
     def __init__(self, matchers: Mapping[int, List[Type[Matcher]]]):
         self._matchers: Dict[int, List[Type[Matcher]]] = defaultdict(list, matchers)
 

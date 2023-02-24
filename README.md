@@ -37,3 +37,13 @@ _✨ NoneBot2 测试框架 ✨_
     <img src="https://discordapp.com/api/guilds/847819937858584596/widget.png?style=shield" alt="Discord Server">
   </a>
 </p>
+
+## 安装
+
+本工具为 [pytest](https://docs.pytest.org/en/stable/) 插件，需要配合 pytest 异步插件使用。
+
+```bash
+poetry add nonebug pytest-asyncio -G test
+# 或者使用 anyio
+poetry add nonebug anyio -G test
+```
