@@ -2,7 +2,7 @@ from functools import wraps
 from typing_extensions import ParamSpec
 from typing import TYPE_CHECKING, Type, Callable, Awaitable, cast
 
-from _pytest.outcomes import Failed
+from _pytest.outcomes import OutcomeException
 
 from .model import Error
 
@@ -19,13 +19,17 @@ P = ParamSpec("P")
 def make_fake_check_matcher(
     ctx: "MatcherContext", check_func: Callable[P, Awaitable[None]]
 ) -> Callable[P, Awaitable[None]]:
+    from nonebot.exception import StopPropagation
+
     @wraps(check_func)
     async def _check_matcher(*args: P.args, **kwargs: P.kwargs):
         matcher_type = cast(Type["Matcher"], kwargs.get("matcher") or args[0])
         try:
             await check_func(*args, **kwargs)
-        except Failed as e:
-            ctx.errors.append(Error(matcher_type, str(e)))
+        except StopPropagation:
+            raise
+        except (Exception, OutcomeException) as e:
+            ctx.errors.append(Error(matcher_type, e))
             raise
 
     return _check_matcher

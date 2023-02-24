@@ -15,6 +15,7 @@ from typing import (
 )
 
 import pytest
+from _pytest.outcomes import Skipped
 
 from nonebug.base import BaseApp
 from nonebug.mixin.call_api import ApiContext
@@ -273,6 +274,10 @@ class MatcherContext(ApiContext):
                 await handle_event(bot=event.bot, event=event.event)
 
                 if self.errors:
+                    if any(isinstance(e, Skipped) for e in self.errors):
+                        pytest.skip(
+                            f"Check skipped when handling event {event}: {self.errors}"
+                        )
                     pytest.fail(
                         f"Some checks failed when handling event {event}: {self.errors}"
                     )

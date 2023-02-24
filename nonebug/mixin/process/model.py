@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Type, ClassVar, Optional
+from typing import TYPE_CHECKING, Type, Union, ClassVar, Optional
+
+from _pytest.outcomes import OutcomeException
 
 if TYPE_CHECKING:
     from nonebot.matcher import Matcher
@@ -81,4 +83,4 @@ class IgnorePermission(Check):
 @dataclass
 class Error:
     matcher: Type["Matcher"]
-    reason: str
+    error: Union[Exception, OutcomeException]
