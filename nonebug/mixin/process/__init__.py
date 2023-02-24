@@ -20,7 +20,7 @@ from _pytest.outcomes import Skipped
 from nonebug.base import BaseApp
 from nonebug.mixin.call_api import ApiContext
 
-from .fake import PATCHES, make_fake_check_matcher, make_fake_default_state
+from .fake import PATCHES, make_fake_default_state
 from .model import (
     Check,
     Action,
@@ -234,16 +234,10 @@ class MatcherContext(ApiContext):
 
     @contextmanager
     def _prepare_matcher_context(self):
-        import nonebot.message
         from nonebot.matcher import Matcher
 
         with self.app.provider.context(self.matchers) as provider:
             with pytest.MonkeyPatch.context() as m:
-                m.setattr(
-                    nonebot.message,
-                    "_check_matcher",
-                    make_fake_check_matcher(self, nonebot.message._check_matcher),
-                )
                 self.patch_matcher(m, Matcher)
                 for matchers in provider.values():
                     for matcher in matchers:

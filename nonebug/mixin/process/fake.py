@@ -1,38 +1,16 @@
-from functools import wraps
 from typing_extensions import ParamSpec
-from typing import TYPE_CHECKING, Type, Callable, Awaitable, cast
+from typing import TYPE_CHECKING, Type, Callable, Awaitable
 
 from _pytest.outcomes import OutcomeException
 
 from .model import Error
 
 if TYPE_CHECKING:
-    from nonebot.typing import T_State
     from nonebot.matcher import Matcher
-    from nonebot.adapters import Bot, Event
 
     from . import MatcherContext
 
 P = ParamSpec("P")
-
-
-def make_fake_check_matcher(
-    ctx: "MatcherContext", check_func: Callable[P, Awaitable[None]]
-) -> Callable[P, Awaitable[None]]:
-    from nonebot.exception import StopPropagation
-
-    @wraps(check_func)
-    async def _check_matcher(*args: P.args, **kwargs: P.kwargs):
-        matcher_type = cast(Type["Matcher"], kwargs.get("matcher") or args[0])
-        try:
-            await check_func(*args, **kwargs)
-        except StopPropagation:
-            raise
-        except (Exception, OutcomeException) as e:
-            ctx.errors.append(Error(matcher_type, e))
-            raise
-
-    return _check_matcher
 
 
 def make_fake_default_state(ctx: "MatcherContext", matcher: Type["Matcher"]) -> dict:
@@ -72,9 +50,7 @@ def make_fake_simple_run(
 ) -> Callable[..., Awaitable[None]]:
     simple_run = matcher.simple_run
 
-    async def fake_simple_run(
-        self: "Matcher", bot: "Bot", event: "Event", state: "T_State", *args, **kwargs
-    ) -> None:
+    async def fake_simple_run(self: "Matcher", *args, **kwargs) -> None:
         from nonebot.exception import (
             PausedException,
             FinishedException,
@@ -82,7 +58,7 @@ def make_fake_simple_run(
         )
 
         try:
-            await simple_run(self, bot, event, state, *args, **kwargs)
+            await simple_run(self, *args, **kwargs)
         except RejectedException:
             ctx.got_action(self._default_state["__nonebug_matcher__"], "reject")
             raise
@@ -96,8 +72,24 @@ def make_fake_simple_run(
     return fake_simple_run
 
 
+def make_fake_run(
+    ctx: "MatcherContext", matcher: Type["Matcher"]
+) -> Callable[..., Awaitable[None]]:
+    run = matcher.run
+
+    async def fake_run(self: "Matcher", *args, **kwargs) -> None:
+        try:
+            await run(self, *args, **kwargs)
+        except (Exception, OutcomeException) as e:
+            ctx.errors.append(Error(self.__class__, e))
+            raise
+
+    return fake_run
+
+
 PATCHES = {
     "check_perm": make_fake_check_perm,
     "check_rule": make_fake_check_rule,
     "simple_run": make_fake_simple_run,
+    "run": make_fake_run,
 }
