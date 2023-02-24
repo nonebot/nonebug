@@ -1,5 +1,5 @@
 import pytest
-from utils import make_fake_event
+from utils import make_fake_event, make_fake_message
 
 from nonebug import App
 
@@ -13,12 +13,14 @@ async def test_process(app: App):
         test_not_pass_rule,
     )
 
+    Message = make_fake_message()
+
     # test
     async with app.test_matcher() as ctx:
         adapter = ctx.create_adapter()
         bot = ctx.create_bot(adapter=adapter)
 
-        event = make_fake_event()()
+        event = make_fake_event(_message=Message())()
         ctx.receive_event(bot, event)
 
         ctx.should_pass_permission(matcher=test)
@@ -33,7 +35,7 @@ async def test_process(app: App):
         ctx.should_call_api("test", {"key": "value"}, "result", adapter=adapter)
         ctx.should_paused(matcher=test)
 
-        event = make_fake_event()()
+        event = make_fake_event(_message=Message())()
         ctx.receive_event(bot, event)
 
         ctx.should_pass_permission(matcher=test)
@@ -46,7 +48,7 @@ async def test_process(app: App):
         adapter = ctx.create_adapter()
         bot = ctx.create_bot(adapter=adapter)
 
-        event = make_fake_event()()
+        event = make_fake_event(_message=Message())()
         ctx.receive_event(bot, event)
 
         ctx.should_ignore_permission()
@@ -55,7 +57,7 @@ async def test_process(app: App):
         ctx.should_call_send(event, "key", "result", bot=bot)
         ctx.should_rejected()
 
-        event = make_fake_event()()
+        event = make_fake_event(_message=Message())()
         ctx.receive_event(bot, event)
 
         ctx.should_pass_permission()
