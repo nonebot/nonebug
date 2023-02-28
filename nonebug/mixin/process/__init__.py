@@ -287,6 +287,8 @@ class MatcherContext(ApiContext):
                 self.errors.clear()
                 event_test_context.reset(t)
 
+        await super().run()
+
 
 class ProcessMixin(BaseApp):
     def test_matcher(
