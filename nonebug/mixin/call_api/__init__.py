@@ -1,6 +1,16 @@
 import contextlib
 from queue import Queue
-from typing import TYPE_CHECKING, Any, Set, Dict, Type, Union, Optional
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Set,
+    Dict,
+    Type,
+    Union,
+    TypeVar,
+    Optional,
+    overload,
+)
 
 import pytest
 
@@ -11,6 +21,9 @@ from .fake import make_fake_bot, make_fake_adapter
 
 if TYPE_CHECKING:
     from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
+
+A = TypeVar("A", bound="Adapter")
+B = TypeVar("B", bound="Bot")
 
 
 class ApiContext(Context):
@@ -38,25 +51,67 @@ class ApiContext(Context):
         get_driver()._bot_connect(bot)
         self.connected_bot.add(bot)
 
+    @overload
     def create_adapter(
         self,
         *,
-        base: Optional[Type["Adapter"]] = None,
+        base: None = None,
         **kwargs: Any,
     ) -> "Adapter":
+        ...
+
+    @overload
+    def create_adapter(
+        self,
+        *,
+        base: Optional[Type[A]] = None,
+        **kwargs: Any,
+    ) -> A:
+        ...
+
+    def create_adapter(
+        self,
+        *,
+        base: Optional[Type[A]] = None,
+        **kwargs: Any,
+    ) -> Union[A, "Adapter"]:
         from nonebot import get_driver
 
         return make_fake_adapter(self, base=base)(get_driver(), **kwargs)
 
+    @overload
     def create_bot(
         self,
         *,
-        base: Optional[Type["Bot"]] = None,
+        base: None = None,
         adapter: Optional["Adapter"] = None,
         self_id: str = "test",
         auto_connect: bool = True,
         **kwargs: Any,
     ) -> "Bot":
+        ...
+
+    @overload
+    def create_bot(
+        self,
+        *,
+        base: Optional[Type[B]] = None,
+        adapter: Optional["Adapter"] = None,
+        self_id: str = "test",
+        auto_connect: bool = True,
+        **kwargs: Any,
+    ) -> B:
+        ...
+
+    def create_bot(
+        self,
+        *,
+        base: Optional[Type[B]] = None,
+        adapter: Optional["Adapter"] = None,
+        self_id: str = "test",
+        auto_connect: bool = True,
+        **kwargs: Any,
+    ) -> Union[B, "Bot"]:
         adapter = adapter or self.create_adapter()
         bot = make_fake_bot(self, base=base)(adapter, self_id, **kwargs)
         if auto_connect:
