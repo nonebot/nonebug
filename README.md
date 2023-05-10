@@ -47,3 +47,15 @@ poetry add nonebug pytest-asyncio -G test
 # 或者使用 anyio
 poetry add nonebug anyio -G test
 ```
+
+```bash
+pdm add nonebug pytest-asyncio -dG test
+# 或者使用 anyio
+pdm add nonebug anyio -dG test
+```
+
+```bash
+pip install nonebug pytest-asyncio
+# 或者使用 anyio
+pip install nonebug anyio
+```
