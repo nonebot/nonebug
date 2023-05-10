@@ -38,6 +38,10 @@ _✨ NoneBot2 测试框架 ✨_
   </a>
 </p>
 
+<p align="center">
+  <a href="https://v2.nonebot.dev/docs/best-practice/testing/">文档</a>
+</p>
+
 ## 安装
 
 本工具为 [pytest](https://docs.pytest.org/en/stable/) 插件，需要配合 pytest 异步插件使用。
@@ -46,4 +50,16 @@ _✨ NoneBot2 测试框架 ✨_
 poetry add nonebug pytest-asyncio -G test
 # 或者使用 anyio
 poetry add nonebug anyio -G test
+```
+
+```bash
+pdm add nonebug pytest-asyncio -dG test
+# 或者使用 anyio
+pdm add nonebug anyio -dG test
+```
+
+```bash
+pip install nonebug pytest-asyncio
+# 或者使用 anyio
+pip install nonebug anyio
 ```
