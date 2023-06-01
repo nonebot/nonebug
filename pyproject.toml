@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebug"
-version = "0.3.3"
+version = "0.3.4"
 description = "nonebot2 test framework"
 authors = ["AkiraXie <l997460364@outlook.com>", "yanyongyu <yyy@nonebot.dev>"]
 license = "MIT"
