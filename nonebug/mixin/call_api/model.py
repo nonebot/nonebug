@@ -15,6 +15,7 @@ class Api(Model):
     name: str
     data: Dict[str, Any]
     result: Any
+    exception: Optional[Exception]
     adapter: Optional["Adapter"]
 
 
@@ -24,4 +25,5 @@ class Send(Model):
     message: Union[str, "Message", "MessageSegment"]
     kwargs: Dict[str, Any]
     result: Any
+    exception: Optional[Exception]
     bot: Optional["Bot"]

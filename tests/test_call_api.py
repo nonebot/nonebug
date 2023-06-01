@@ -80,7 +80,7 @@ async def test_fake(app: App):
 
 
 @pytest.mark.asyncio
-async def test_got_call(app: App):
+async def test_got_call_api(app: App):
     async with app.test_api() as ctx:
         adapter = ctx.create_adapter()
         bot = ctx.create_bot(self_id="test", adapter=adapter)
@@ -93,6 +93,23 @@ async def test_got_call(app: App):
     assert "test" not in get_bots()
 
     async with app.test_api() as ctx:
+        adapter = ctx.create_adapter()
+        bot = ctx.create_bot(self_id="test", adapter=adapter)
+        assert "test" in get_bots()
+        api = ctx.should_call_api(
+            "test", {"key": "value"}, exception=RuntimeError(), adapter=adapter
+        )
+        with pytest.raises(RuntimeError):
+            result = await bot.call_api("test", key="value")
+
+        assert ctx.wait_list.empty()
+
+    assert "test" not in get_bots()
+
+
+@pytest.mark.asyncio
+async def test_got_call_send(app: App):
+    async with app.test_api() as ctx:
         bot = ctx.create_bot(self_id="test")
         assert "test" in get_bots()
         event = make_fake_event()()
@@ -100,5 +117,19 @@ async def test_got_call(app: App):
         result = await bot.send(event, "test", key="value")
         assert ctx.wait_list.empty()
         assert result == "result"
+
+    assert "test" not in get_bots()
+
+    async with app.test_api() as ctx:
+        bot = ctx.create_bot(self_id="test")
+        assert "test" in get_bots()
+        event = make_fake_event()()
+        api = ctx.should_call_send(
+            event, "test", exception=RuntimeError(), bot=bot, key="value"
+        )
+        with pytest.raises(RuntimeError):
+            result = await bot.send(event, "test", key="value")
+
+        assert ctx.wait_list.empty()
 
     assert "test" not in get_bots()

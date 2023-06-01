@@ -5,8 +5,8 @@ import pytest
 import nonebot
 from nonebot.plugin import Plugin
 
-from nonebug.fixture import *
 from nonebug import NONEBOT_INIT_KWARGS
+from nonebug.fixture import nonebug_app, nonebug_init
 
 
 def pytest_configure(config: pytest.Config) -> None:

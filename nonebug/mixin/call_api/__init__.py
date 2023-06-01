@@ -132,10 +132,13 @@ class ApiContext(Context):
         self,
         api: str,
         data: Dict[str, Any],
-        result: Any,
+        result: Optional[Any] = None,
+        exception: Optional[Exception] = None,
         adapter: Optional["Adapter"] = None,
     ) -> Api:
-        model = Api(name=api, data=data, result=result, adapter=adapter)
+        model = Api(
+            name=api, data=data, result=result, exception=exception, adapter=adapter
+        )
         self.wait_list.put(model)
         return model
 
@@ -143,12 +146,18 @@ class ApiContext(Context):
         self,
         event: "Event",
         message: Union[str, "Message", "MessageSegment"],
-        result: Any,
+        result: Optional[Any] = None,
+        exception: Optional[Exception] = None,
         bot: Optional["Bot"] = None,
         **kwargs: Any,
     ) -> Send:
         model = Send(
-            event=event, message=message, kwargs=kwargs, result=result, bot=bot
+            event=event,
+            message=message,
+            kwargs=kwargs,
+            result=result,
+            exception=exception,
+            bot=bot,
         )
         self.wait_list.put(model)
         return model
@@ -171,6 +180,9 @@ class ApiContext(Context):
             pytest.fail(
                 f"Application got api call {api} with adapter {adapter} but expected {model.adapter}"
             )
+
+        if model.exception is not None:
+            raise model.exception
         return model.result
 
     def got_call_send(
@@ -203,6 +215,9 @@ class ApiContext(Context):
             pytest.fail(
                 f"Application got send call with bot {bot} but expected {model.bot}"
             )
+
+        if model.exception is not None:
+            raise model.exception
         return model.result
 
     @contextlib.contextmanager
