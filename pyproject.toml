@@ -5,9 +5,9 @@ description = "nonebot2 test framework"
 authors = ["AkiraXie <l997460364@outlook.com>", "yanyongyu <yyy@nonebot.dev>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://v2.nonebot.dev/"
+homepage = "https://nonebot.dev/"
 repository = "https://github.com/nonebot/nonebug"
-documentation = "https://v2.nonebot.dev/"
+documentation = "https://nonebot.dev/"
 keywords = ["nonebot", "pytest", "test", "bot", "onebot", "cqhttp"]
 classifiers = ["Framework :: Pytest"]
 

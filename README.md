@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD033 MD041 -->
 
 <p align="center">
-  <a href="https://v2.nonebot.dev/"><img src="https://github.com/nonebot/nonebug/raw/master/assets/logo.png" width="200" height="200" alt="nonebot"></a>
+  <a href="https://nonebot.dev/"><img src="https://github.com/nonebot/nonebug/raw/master/assets/logo.png" width="200" height="200" alt="nonebot"></a>
 </p>
 
 <div align="center">
@@ -39,7 +39,7 @@ _✨ NoneBot2 测试框架 ✨_
 </p>
 
 <p align="center">
-  <a href="https://v2.nonebot.dev/docs/best-practice/testing/">文档</a>
+  <a href="https://nonebot.dev/docs/best-practice/testing/">文档</a>
 </p>
 
 ## 安装
