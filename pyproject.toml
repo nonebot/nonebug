@@ -20,7 +20,7 @@ typing-extensions = "^4.0.0"
 async-asgi-testclient = "^1.4.8"
 
 [tool.poetry.group.dev.dependencies]
-pycln = "^2.1.4"
+ruff = "^0.0.285"
 isort = "^5.10.1"
 black = "^23.1.0"
 nonemoji = "^0.1.3"
@@ -30,7 +30,9 @@ nonebot2 = { git = "https://github.com/nonebot/nonebot2.git" }
 [tool.poetry.group.test.dependencies]
 pytest-cov = "^4.0.0"
 pytest-asyncio = "^0.21.0"
-nonebot2 = { git = "https://github.com/nonebot/nonebot2.git", extras = ["fastapi"] }
+nonebot2 = { git = "https://github.com/nonebot/nonebot2.git", extras = [
+  "fastapi",
+] }
 
 [tool.poetry.plugins.pytest11]
 nonebug = "nonebug.fixture"
@@ -54,22 +56,29 @@ skip_gitignore = true
 force_sort_within_sections = true
 extra_standard_library = ["typing_extensions"]
 
-[tool.pycln]
-path = "."
-all = false
+[tool.ruff]
+select = ["E", "W", "F", "UP", "C", "T", "PYI", "PT", "Q"]
+ignore = ["E402", "C901", "UP037"]
+
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false
 
 [tool.coverage.report]
 exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "def __str__",
-    "if __name__ == .__main__.:",
-    "if (typing\\.)?TYPE_CHECKING( is True)?:",
-    "@(abc\\.)?abstractmethod",
-    "@(typing\\.)?overload",
-    "raise NotImplementedError",
-    "\\.\\.\\.",
-    "pass",
+  "pragma: no cover",
+  "def __repr__",
+  "def __str__",
+  "if __name__ == .__main__.:",
+  "if (typing\\.)?TYPE_CHECKING( is True)?:",
+  "@(abc\\.)?abstractmethod",
+  "@(typing\\.)?overload",
+  "raise NotImplementedError",
+  "\\.\\.\\.",
+  "pass",
 ]
 
 [build-system]
