@@ -71,7 +71,7 @@ class MatcherContext(ApiContext):
         matchers: Optional[Dict[int, List[Type["Matcher"]]]],
         **kwargs,
     ):
-        super(MatcherContext, self).__init__(app, *args, **kwargs)
+        super().__init__(app, *args, **kwargs)
         self.matchers = matchers
         self.event_list: List[Tuple[ReceiveEvent, EventTest]] = []
         self.errors = []
@@ -168,12 +168,14 @@ class MatcherContext(ApiContext):
                 if isinstance(check, PermissionPass):
                     if not result:
                         pytest.fail(
-                            f"{matcher} should pass permission check when receive {event}"
+                            f"{matcher} should pass permission check "
+                            f"when receive {event}"
                         )
                 elif isinstance(check, PermissionNotPass):
                     if result:
                         pytest.fail(
-                            f"{matcher} should not pass permission check when receive {event}"
+                            f"{matcher} should not pass permission check "
+                            f"when receive {event}"
                         )
                 elif isinstance(check, IgnorePermission):
                     result = True
@@ -277,11 +279,13 @@ class MatcherContext(ApiContext):
                     )
                 if remain_checks := [c for c in context["checks"] if c.matcher]:
                     pytest.fail(
-                        f"Some checks remain after receive event {event}: {remain_checks}"
+                        f"Some checks remain after receive "
+                        f"event {event}: {remain_checks}"
                     )
                 if remain_actions := [a for a in context["actions"] if a.matcher]:
                     pytest.fail(
-                        f"Some actions remain after receive event {event}: {remain_actions}"
+                        f"Some actions remain after receive "
+                        f"event {event}: {remain_actions}"
                     )
             finally:
                 self.errors.clear()

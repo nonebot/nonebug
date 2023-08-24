@@ -24,7 +24,7 @@ class DependentContext(ApiContext):
         dependent: "Dependent",
         **kwargs,
     ):
-        super(DependentContext, self).__init__(app, *args, **kwargs)
+        super().__init__(app, *args, **kwargs)
         self.dependent = dependent
         self.kwargs: Dict[str, Any] = {}
 
@@ -59,7 +59,7 @@ class DependentMixin(BaseApp):
             dependent = Dependent[Any].parse(
                 call=dependent,
                 parameterless=parameterless,
-                allow_types=allow_types or tuple(),
+                allow_types=allow_types or (),
             )
 
         return DependentContext(self, dependent=dependent)

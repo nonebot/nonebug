@@ -2,7 +2,6 @@ from copy import deepcopy
 from collections import defaultdict
 from contextlib import contextmanager
 from typing import (
-    Any,
     Dict,
     List,
     Type,
@@ -51,7 +50,7 @@ class NoneBugProvider(MatcherProvider):  # pragma: no cover
     def __delitem__(self, key: int) -> None:
         del self._matchers[key]
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return self._matchers == other
 
     def keys(self) -> KeysView[int]:

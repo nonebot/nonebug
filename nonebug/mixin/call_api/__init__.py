@@ -45,10 +45,8 @@ class ApiContext(Context):
         self.wait_list: Queue[Model] = Queue()
         self.connected_bot: Set["Bot"] = set()
 
-    def _connect_bot(self, bot: "Bot") -> None:
-        from nonebot import get_driver
-
-        get_driver()._bot_connect(bot)
+    def _connect_bot(self, adapter: "Adapter", bot: "Bot") -> None:
+        adapter.bot_connect(bot)
         self.connected_bot.add(bot)
 
     @overload
@@ -115,7 +113,7 @@ class ApiContext(Context):
         adapter = adapter or self.create_adapter()
         bot = make_fake_bot(self, base=base)(adapter, self_id, **kwargs)
         if auto_connect:
-            self._connect_bot(bot)
+            self._connect_bot(adapter, bot)
         return bot
 
     def patch_adapter(
@@ -174,11 +172,13 @@ class ApiContext(Context):
             pytest.fail(f"Application got api call {api} but expected {model.name}")
         if model.data != data:
             pytest.fail(
-                f"Application got api call {api} with data {data} but expected {model.data}"
+                f"Application got api call {api} with "
+                f"data {data} but expected {model.data}"
             )
         if model.adapter and model.adapter != adapter:
             pytest.fail(
-                f"Application got api call {api} with adapter {adapter} but expected {model.adapter}"
+                f"Application got api call {api} with "
+                f"adapter {adapter} but expected {model.adapter}"
             )
 
         if model.exception is not None:
@@ -194,22 +194,26 @@ class ApiContext(Context):
     ) -> Any:
         if self.wait_list.empty():
             pytest.fail(
-                f"Application has no send call but expected event={event} message={message} kwargs={kwargs}"
+                "Application has no send call but expected "
+                f"event={event} message={message} kwargs={kwargs}"
             )
         model = self.wait_list.get()
         if not isinstance(model, Send):
             pytest.fail(f"Application got send call but expected {model}")
         if model.event.dict() != event.dict():
             pytest.fail(
-                f"Application got send call with event {event} but expected {model.event}"
+                "Application got send call with "
+                f"event {event} but expected {model.event}"
             )
         if model.message != message:
             pytest.fail(
-                f"Application got send call with message {message} but expected {model.message}"
+                "Application got send call with "
+                f"message {message} but expected {model.message}"
             )
         if model.kwargs != kwargs:
             pytest.fail(
-                f"Application got send call with kwargs {kwargs} but expected {model.kwargs}"
+                "Application got send call with "
+                f"kwargs {kwargs} but expected {model.kwargs}"
             )
         if model.bot and model.bot != bot:
             pytest.fail(
@@ -222,8 +226,6 @@ class ApiContext(Context):
 
     @contextlib.contextmanager
     def _prepare_api_context(self):
-        from nonebot import get_driver
-
         with pytest.MonkeyPatch.context() as m:
             self._prepare_adapters(m)
             self._prepare_bots(m)
@@ -232,7 +234,7 @@ class ApiContext(Context):
             finally:
                 while self.connected_bot:
                     bot = self.connected_bot.pop()
-                    get_driver()._bot_disconnect(bot)
+                    bot.adapter.bot_disconnect(bot)
 
     def _prepare_adapters(self, monkeypatch: pytest.MonkeyPatch) -> None:
         from nonebot import get_driver

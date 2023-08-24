@@ -6,7 +6,7 @@ import nonebot
 from nonebot.plugin import Plugin
 
 from nonebug import NONEBOT_INIT_KWARGS
-from nonebug.fixture import *  # nopycln: import
+from nonebug.fixture import *  # noqa: F403
 
 
 def pytest_configure(config: pytest.Config) -> None:

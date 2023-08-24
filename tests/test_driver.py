@@ -21,7 +21,7 @@ async def test_driver(app: App):
 
     class FakeAdapter(Adapter):
         def __init__(self, driver: Driver, **kwargs):
-            super(FakeAdapter, self).__init__(driver, **kwargs)
+            super().__init__(driver, **kwargs)
             setup = HTTPServerSetup(URL("/test"), "POST", "test", self.handle)
             self.setup_http_server(setup)
 

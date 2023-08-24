@@ -1,3 +1,4 @@
+from typing_extensions import override
 from typing import TYPE_CHECKING, Any, Type, Union, TypeVar, Optional, overload
 
 if TYPE_CHECKING:
@@ -24,17 +25,16 @@ def make_fake_adapter(
     ctx: "ApiContext", base: Optional[A] = None
 ) -> Union[A, Type["Adapter"]]:
     from nonebot.adapters import Adapter
-    from nonebot.typing import overrides
 
     _base = base or Adapter
 
     class FakeAdapter(_base):  # type: ignore
         @classmethod
-        @overrides(_base)
+        @override
         def get_name(cls) -> str:
             return "fake"
 
-        @overrides(_base)
+        @override
         async def _call_api(self, bot: "Bot", api: str, **data) -> Any:
             return ctx.got_call_api(self, api, **data)
 
@@ -53,12 +53,11 @@ def make_fake_bot(ctx: "ApiContext", base: B) -> B:
 
 def make_fake_bot(ctx: "ApiContext", base: Optional[B] = None) -> Union[B, Type["Bot"]]:
     from nonebot.adapters import Bot
-    from nonebot.typing import overrides
 
     _base = base or Bot
 
     class FakeBot(_base):  # type: ignore
-        @overrides(_base)
+        @override
         async def send(
             self,
             event: "Event",
