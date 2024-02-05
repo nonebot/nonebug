@@ -9,8 +9,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class Model:
-    ...
+class Model: ...
 
 
 @dataclass
@@ -25,18 +24,15 @@ class Action(Model):
 
 
 @dataclass
-class Paused(Action):
-    ...
+class Paused(Action): ...
 
 
 @dataclass
-class Rejected(Action):
-    ...
+class Rejected(Action): ...
 
 
 @dataclass
-class Finished(Action):
-    ...
+class Finished(Action): ...
 
 
 @dataclass

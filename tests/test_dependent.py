@@ -12,8 +12,7 @@ async def test_dependent(app: App):
     FakeEvent = make_fake_event(test_field=(str, "test"))
     FakeEvent2 = make_fake_event(test_field2=(str, "test2"))
 
-    def _handle(event: Event):
-        ...
+    def _handle(event: Event): ...
 
     def _handle_fake(event: FakeEvent):  # type: ignore
         ...

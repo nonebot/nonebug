@@ -6,8 +6,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class Model:
-    ...
+class Model: ...
 
 
 @dataclass

@@ -11,13 +11,11 @@ B = TypeVar("B", bound=Type["Bot"])
 
 
 @overload
-def make_fake_adapter(ctx: "ApiContext", base: None = None) -> Type["Adapter"]:
-    ...
+def make_fake_adapter(ctx: "ApiContext", base: None = None) -> Type["Adapter"]: ...
 
 
 @overload
-def make_fake_adapter(ctx: "ApiContext", base: A) -> A:
-    ...
+def make_fake_adapter(ctx: "ApiContext", base: A) -> A: ...
 
 
 # fake class should be created every init
@@ -42,13 +40,11 @@ def make_fake_adapter(
 
 
 @overload
-def make_fake_bot(ctx: "ApiContext", base: None = None) -> Type["Bot"]:
-    ...
+def make_fake_bot(ctx: "ApiContext", base: None = None) -> Type["Bot"]: ...
 
 
 @overload
-def make_fake_bot(ctx: "ApiContext", base: B) -> B:
-    ...
+def make_fake_bot(ctx: "ApiContext", base: B) -> B: ...
 
 
 def make_fake_bot(ctx: "ApiContext", base: Optional[B] = None) -> Union[B, Type["Bot"]]:
