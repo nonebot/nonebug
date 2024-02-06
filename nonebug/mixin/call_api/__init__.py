@@ -55,8 +55,7 @@ class ApiContext(Context):
         *,
         base: None = None,
         **kwargs: Any,
-    ) -> "Adapter":
-        ...
+    ) -> "Adapter": ...
 
     @overload
     def create_adapter(
@@ -64,8 +63,7 @@ class ApiContext(Context):
         *,
         base: Optional[Type[A]] = None,
         **kwargs: Any,
-    ) -> A:
-        ...
+    ) -> A: ...
 
     def create_adapter(
         self,
@@ -86,8 +84,7 @@ class ApiContext(Context):
         self_id: str = "test",
         auto_connect: bool = True,
         **kwargs: Any,
-    ) -> "Bot":
-        ...
+    ) -> "Bot": ...
 
     @overload
     def create_bot(
@@ -98,8 +95,7 @@ class ApiContext(Context):
         self_id: str = "test",
         auto_connect: bool = True,
         **kwargs: Any,
-    ) -> B:
-        ...
+    ) -> B: ...
 
     def create_bot(
         self,

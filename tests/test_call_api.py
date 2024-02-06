@@ -60,11 +60,9 @@ async def test_should_call_send(app: App):
 
 @pytest.mark.asyncio
 async def test_fake(app: App):
-    class FakeAdapter(Adapter):
-        ...
+    class FakeAdapter(Adapter): ...
 
-    class FakeBot(Bot):
-        ...
+    class FakeBot(Bot): ...
 
     async with app.test_api() as ctx:
         adapter = ctx.create_adapter(base=FakeAdapter)
