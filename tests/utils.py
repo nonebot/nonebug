@@ -70,6 +70,8 @@ def make_fake_event(
     _Fake = create_model("_Fake", __base__=_base or Event, **fields)
 
     class FakeEvent(_Fake):
+        model_config = {"extra": "forbid"}
+
         def get_type(self) -> str:
             return _type
 
@@ -96,8 +98,5 @@ def make_fake_event(
 
         def is_tome(self) -> bool:
             return _to_me
-
-        class Config:
-            extra = "forbid"
 
     return FakeEvent

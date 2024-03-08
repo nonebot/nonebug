@@ -13,6 +13,7 @@ from typing import (
 )
 
 import pytest
+from nonebot.compat import model_dump
 
 from nonebug.base import BaseApp, Context
 
@@ -196,7 +197,7 @@ class ApiContext(Context):
         model = self.wait_list.get()
         if not isinstance(model, Send):
             pytest.fail(f"Application got send call but expected {model}")
-        if model.event.dict() != event.dict():
+        if model_dump(model.event) != model_dump(event):
             pytest.fail(
                 "Application got send call with "
                 f"event {event} but expected {model.event}"
