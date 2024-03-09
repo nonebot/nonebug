@@ -23,6 +23,8 @@ async def test_should_call_send(app: App):
     from nonebot.adapters import Event, Message
 
     class FakeEvent(Event):
+        model_config = {"extra": "forbid"}
+
         def get_type(self) -> str:
             return "test"
 
@@ -43,9 +45,6 @@ async def test_should_call_send(app: App):
 
         def is_tome(self) -> bool:
             return True
-
-        class Config:
-            extra = "forbid"
 
     event = FakeEvent()
     async with app.test_api() as ctx:
