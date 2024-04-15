@@ -13,7 +13,6 @@ from typing import (
 )
 
 import pytest
-from nonebot.compat import model_dump
 
 from nonebug.base import BaseApp, Context
 
@@ -189,6 +188,8 @@ class ApiContext(Context):
         message: Union[str, "Message", "MessageSegment"],
         **kwargs: Any,
     ) -> Any:
+        from nonebot.compat import model_dump
+
         if self.wait_list.empty():
             pytest.fail(
                 "Application has no send call but expected "
