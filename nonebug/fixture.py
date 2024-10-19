@@ -12,6 +12,7 @@ async def nonebug_init(request: pytest.FixtureRequest):
     Initialize nonebot before test case running.
     """
     import nonebot
+    from nonebot import logger
     from nonebot.matcher import matchers
 
     from nonebug.provider import NoneBugProvider
@@ -22,12 +23,26 @@ async def nonebug_init(request: pytest.FixtureRequest):
     run_lifespan = request.config.stash.get(NONEBOT_START_LIFESPAN, True)
     driver = nonebot.get_driver()
     if run_lifespan:
-        await driver._lifespan.startup()
+        try:
+            await driver._lifespan.startup()
+        except Exception as e:
+            logger.opt(colors=True, exception=e).error(
+                "<r><bg #f8bbd0>Error occurred while running startup hook."
+                "</bg #f8bbd0></r>"
+            )
+            raise
 
-    yield
-
-    if run_lifespan:
-        await driver._lifespan.shutdown()
+    try:
+        yield
+    finally:
+        if run_lifespan:
+            try:
+                await driver._lifespan.shutdown()
+            except Exception as e:
+                logger.opt(colors=True, exception=e).error(
+                    "<r><bg #f8bbd0>Error occurred while running shutdown hook."
+                    "</bg #f8bbd0></r>"
+                )
 
 
 @pytest.fixture(name="app")
