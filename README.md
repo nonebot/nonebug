@@ -22,7 +22,7 @@ _✨ NoneBot2 测试框架 ✨_
   <a href="https://pypi.python.org/pypi/nonebug">
     <img src="https://img.shields.io/pypi/v/nonebug" alt="pypi">
   </a>
-  <img src="https://img.shields.io/badge/python-3.8+-blue" alt="python">
+  <img src="https://img.shields.io/badge/python-3.9+-blue" alt="python">
   <a href="https://codecov.io/gh/nonebot/nonebug">
     <img src="https://codecov.io/gh/nonebot/nonebug/branch/master/graph/badge.svg?token=LDK2OFR231"/>
   </a>
