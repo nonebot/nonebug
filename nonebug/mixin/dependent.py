@@ -1,6 +1,7 @@
 from typing_extensions import final
+from collections.abc import Iterable
 from contextlib import AsyncExitStack
-from typing import TYPE_CHECKING, Any, Dict, Type, Union, Callable, Iterable, Optional
+from typing import TYPE_CHECKING, Any, Union, Callable, Optional
 
 import pytest
 
@@ -26,7 +27,7 @@ class DependentContext(ApiContext):
     ):
         super().__init__(app, *args, **kwargs)
         self.dependent = dependent
-        self.kwargs: Dict[str, Any] = {}
+        self.kwargs: dict[str, Any] = {}
 
     def pass_params(self, **kwargs: Any) -> None:
         self.kwargs.update(kwargs)
@@ -50,7 +51,7 @@ class DependentMixin(BaseApp):
     def test_dependent(
         self,
         dependent: Union["Dependent", Callable[..., Any]],
-        allow_types: Optional[Iterable[Type["Param"]]] = None,
+        allow_types: Optional[Iterable[type["Param"]]] = None,
         parameterless: Optional[Iterable[Any]] = None,
     ) -> DependentContext:
         from nonebot.dependencies import Dependent

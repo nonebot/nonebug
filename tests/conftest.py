@@ -1,4 +1,3 @@
-from typing import Set
 from pathlib import Path
 
 import pytest
@@ -14,5 +13,5 @@ def pytest_configure(config: pytest.Config) -> None:
 
 
 @pytest.fixture(scope="session")
-def load_plugin(nonebug_init: None) -> Set[Plugin]:
+def load_plugin(nonebug_init: None) -> set[Plugin]:
     return nonebot.load_plugins(str(Path(__file__).parent / "plugins"))

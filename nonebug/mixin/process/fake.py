@@ -1,5 +1,6 @@
+from collections.abc import Awaitable
 from typing_extensions import ParamSpec
-from typing import TYPE_CHECKING, Type, Callable, Awaitable
+from typing import TYPE_CHECKING, Callable
 
 from _pytest.outcomes import OutcomeException
 
@@ -13,17 +14,17 @@ if TYPE_CHECKING:
 P = ParamSpec("P")
 
 
-def make_fake_default_state(ctx: "MatcherContext", matcher: Type["Matcher"]) -> dict:
+def make_fake_default_state(ctx: "MatcherContext", matcher: type["Matcher"]) -> dict:
     return {**matcher._default_state, "__nonebug_matcher__": matcher}
 
 
 def make_fake_check_perm(
-    ctx: "MatcherContext", matcher: Type["Matcher"]
+    ctx: "MatcherContext", matcher: type["Matcher"]
 ) -> Callable[..., Awaitable[bool]]:
     check_perm = matcher.__dict__["check_perm"]
 
     @classmethod
-    async def fake_check_perm(cls: Type["Matcher"], *args, **kwargs) -> bool:
+    async def fake_check_perm(cls: type["Matcher"], *args, **kwargs) -> bool:
         result = await check_perm.__get__(None, cls)(*args, **kwargs)
         return ctx.got_check_permission(
             cls._default_state["__nonebug_matcher__"], result
@@ -33,12 +34,12 @@ def make_fake_check_perm(
 
 
 def make_fake_check_rule(
-    ctx: "MatcherContext", matcher: Type["Matcher"]
+    ctx: "MatcherContext", matcher: type["Matcher"]
 ) -> Callable[..., Awaitable[bool]]:
     check_rule = matcher.__dict__["check_rule"]
 
     @classmethod
-    async def fake_check_rule(cls: Type["Matcher"], *args, **kwargs) -> bool:
+    async def fake_check_rule(cls: type["Matcher"], *args, **kwargs) -> bool:
         result = await check_rule.__get__(None, cls)(*args, **kwargs)
         return ctx.got_check_rule(cls._default_state["__nonebug_matcher__"], result)
 
@@ -46,7 +47,7 @@ def make_fake_check_rule(
 
 
 def make_fake_simple_run(
-    ctx: "MatcherContext", matcher: Type["Matcher"]
+    ctx: "MatcherContext", matcher: type["Matcher"]
 ) -> Callable[..., Awaitable[None]]:
     simple_run = matcher.simple_run
 
@@ -73,7 +74,7 @@ def make_fake_simple_run(
 
 
 def make_fake_run(
-    ctx: "MatcherContext", matcher: Type["Matcher"]
+    ctx: "MatcherContext", matcher: type["Matcher"]
 ) -> Callable[..., Awaitable[None]]:
     run = matcher.run
 

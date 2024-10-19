@@ -1,16 +1,6 @@
 import contextlib
 from queue import Queue
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Set,
-    Dict,
-    Type,
-    Union,
-    TypeVar,
-    Optional,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Union, TypeVar, Optional, overload
 
 import pytest
 
@@ -43,7 +33,7 @@ class ApiContext(Context):
     def __init__(self, app: BaseApp, *args, **kwargs):
         super().__init__(app, *args, **kwargs)
         self.wait_list: Queue[Model] = Queue()
-        self.connected_bot: Set["Bot"] = set()
+        self.connected_bot: set["Bot"] = set()
 
     def _connect_bot(self, adapter: "Adapter", bot: "Bot") -> None:
         adapter.bot_connect(bot)
@@ -61,14 +51,14 @@ class ApiContext(Context):
     def create_adapter(
         self,
         *,
-        base: Optional[Type[A]] = None,
+        base: Optional[type[A]] = None,
         **kwargs: Any,
     ) -> A: ...
 
     def create_adapter(
         self,
         *,
-        base: Optional[Type[A]] = None,
+        base: Optional[type[A]] = None,
         **kwargs: Any,
     ) -> Union[A, "Adapter"]:
         from nonebot import get_driver
@@ -90,7 +80,7 @@ class ApiContext(Context):
     def create_bot(
         self,
         *,
-        base: Optional[Type[B]] = None,
+        base: Optional[type[B]] = None,
         adapter: Optional["Adapter"] = None,
         self_id: str = "test",
         auto_connect: bool = True,
@@ -100,7 +90,7 @@ class ApiContext(Context):
     def create_bot(
         self,
         *,
-        base: Optional[Type[B]] = None,
+        base: Optional[type[B]] = None,
         adapter: Optional["Adapter"] = None,
         self_id: str = "test",
         auto_connect: bool = True,
@@ -125,7 +115,7 @@ class ApiContext(Context):
     def should_call_api(
         self,
         api: str,
-        data: Dict[str, Any],
+        data: dict[str, Any],
         result: Optional[Any] = None,
         exception: Optional[Exception] = None,
         adapter: Optional["Adapter"] = None,

@@ -1,17 +1,17 @@
 from typing_extensions import override
-from typing import TYPE_CHECKING, Any, Type, Union, TypeVar, Optional, overload
+from typing import TYPE_CHECKING, Any, Union, TypeVar, Optional, overload
 
 if TYPE_CHECKING:
     from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
 
     from . import ApiContext
 
-A = TypeVar("A", bound=Type["Adapter"])
-B = TypeVar("B", bound=Type["Bot"])
+A = TypeVar("A", bound=type["Adapter"])
+B = TypeVar("B", bound=type["Bot"])
 
 
 @overload
-def make_fake_adapter(ctx: "ApiContext", base: None = None) -> Type["Adapter"]: ...
+def make_fake_adapter(ctx: "ApiContext", base: None = None) -> type["Adapter"]: ...
 
 
 @overload
@@ -21,7 +21,7 @@ def make_fake_adapter(ctx: "ApiContext", base: A) -> A: ...
 # fake class should be created every init
 def make_fake_adapter(
     ctx: "ApiContext", base: Optional[A] = None
-) -> Union[A, Type["Adapter"]]:
+) -> Union[A, type["Adapter"]]:
     from nonebot.adapters import Adapter
 
     _base = base or Adapter
@@ -29,32 +29,32 @@ def make_fake_adapter(
     class FakeAdapter(_base):  # type: ignore
         @classmethod
         @override
-        def get_name(cls) -> str:
+        def get_name(cls) -> str:  # type: ignore
             return "fake"
 
         @override
-        async def _call_api(self, bot: "Bot", api: str, **data) -> Any:
+        async def _call_api(self, bot: "Bot", api: str, **data) -> Any:  # type: ignore
             return ctx.got_call_api(self, api, **data)
 
     return FakeAdapter
 
 
 @overload
-def make_fake_bot(ctx: "ApiContext", base: None = None) -> Type["Bot"]: ...
+def make_fake_bot(ctx: "ApiContext", base: None = None) -> type["Bot"]: ...
 
 
 @overload
 def make_fake_bot(ctx: "ApiContext", base: B) -> B: ...
 
 
-def make_fake_bot(ctx: "ApiContext", base: Optional[B] = None) -> Union[B, Type["Bot"]]:
+def make_fake_bot(ctx: "ApiContext", base: Optional[B] = None) -> Union[B, type["Bot"]]:
     from nonebot.adapters import Bot
 
     _base = base or Bot
 
     class FakeBot(_base):  # type: ignore
         @override
-        async def send(
+        async def send(  # type: ignore
             self,
             event: "Event",
             message: Union[str, "Message", "MessageSegment"],

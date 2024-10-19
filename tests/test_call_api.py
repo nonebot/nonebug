@@ -23,7 +23,7 @@ async def test_should_call_send(app: App):
     from nonebot.adapters import Event, Message
 
     class FakeEvent(Event):
-        model_config = {"extra": "forbid"}
+        model_config = {"extra": "forbid"}  # noqa: RUF012
 
         def get_type(self) -> str:
             return "test"
