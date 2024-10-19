@@ -1,13 +1,12 @@
 import pytest
-import pytest_asyncio
 
 from nonebug.app import App
 
 from . import NONEBOT_INIT_KWARGS, NONEBOT_START_LIFESPAN
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
-async def nonebug_init(request: pytest.FixtureRequest):
+@pytest.fixture(scope="session", autouse=True)
+async def nonebug_init(request: pytest.FixtureRequest):  # noqa: PT004
     """
     Initialize nonebot before test case running.
     """
