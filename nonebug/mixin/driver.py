@@ -6,7 +6,6 @@ from async_asgi_testclient import TestClient
 
 from nonebug.base import BaseApp, Context
 
-
 _global_client: Optional[TestClient] = None
 
 

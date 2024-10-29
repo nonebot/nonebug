@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager, nullcontext
+from contextlib import nullcontext, asynccontextmanager
 
 import pytest
 from async_asgi_testclient import TestClient
@@ -51,7 +51,6 @@ async def nonebug_init(request: pytest.FixtureRequest):  # noqa: PT004
     Initialize nonebot before test case running.
     """
     import nonebot
-    from nonebot import logger
     from nonebot.matcher import matchers
 
     from nonebug.provider import NoneBugProvider
