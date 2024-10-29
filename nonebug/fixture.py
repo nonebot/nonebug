@@ -12,6 +12,7 @@ from . import NONEBOT_INIT_KWARGS, NONEBOT_START_LIFESPAN
 @asynccontextmanager
 async def lifespan_ctx():
     import nonebot
+    from nonebot import logger
     from nonebot.drivers import ASGIMixin
 
     driver = nonebot.get_driver()
