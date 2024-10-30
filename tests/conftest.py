@@ -5,7 +5,7 @@ import nonebot
 from nonebot.plugin import Plugin
 
 from nonebug import NONEBOT_INIT_KWARGS
-from nonebug.fixture import *  # noqa: F403
+from nonebug.fixture import nonebug_app, nonebug_init, _nonebot_init  # noqa: F401
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -13,5 +13,5 @@ def pytest_configure(config: pytest.Config) -> None:
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def after_nonebot_init(_nonebot_init: None) -> set[Plugin]:
+async def after_nonebot_init(_nonebot_init: None) -> set[Plugin]:  # noqa: F811
     return nonebot.load_plugins(str(Path(__file__).parent / "plugins"))

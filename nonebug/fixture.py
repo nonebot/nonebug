@@ -86,4 +86,4 @@ def nonebug_app(nonebug_init) -> App:
     return App()
 
 
-__all__ = ["nonebug_init", "nonebug_app"]
+__all__ = ["after_nonebot_init", "nonebug_init", "nonebug_app"]
