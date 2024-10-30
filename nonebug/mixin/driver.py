@@ -15,6 +15,8 @@ def set_global_client(client: TestClient):
     if _global_client is not None:
         raise RuntimeError()
 
+    _global_client = client
+
 
 def get_global_client() -> Optional[TestClient]:
     return _global_client
