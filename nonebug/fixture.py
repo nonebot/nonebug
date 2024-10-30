@@ -66,7 +66,9 @@ async def after_nonebot_init(_nonebot_init: None):  # noqa: PT004
 
 
 @pytest.fixture(scope="session", autouse=True)
-async def nonebug_init(after_nonebot_init: None, request: pytest.FixtureRequest):  # noqa: PT004
+async def nonebug_init(  # noqa: PT004
+    _nonebot_init: None, after_nonebot_init: None, request: pytest.FixtureRequest
+):
     run_lifespan = request.config.stash.get(NONEBOT_START_LIFESPAN, True)
 
     ctx = lifespan_ctx() if run_lifespan else nullcontext()
