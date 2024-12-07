@@ -3,6 +3,7 @@ from utils import make_fake_event
 from nonebot.adapters import Event
 from nonebot.params import EventParam
 from nonebot.exception import TypeMisMatch
+from exceptiongroup import BaseExceptionGroup
 
 from nonebug import App
 
@@ -23,11 +24,20 @@ async def test_dependent(app: App):
         ctx.pass_params(event=FakeEvent())
 
     event = FakeEvent2()
-    with pytest.raises(TypeMisMatch) as e:
+    with pytest.raises((TypeMisMatch, BaseExceptionGroup)) as exc_info:
         async with app.test_dependent(_handle_fake, allow_types=[EventParam]) as ctx:
             ctx.pass_params(event=event)
-    assert e.value.param.name == "event"
-    assert e.value.value is event
+
+    if isinstance(exc_info.value, BaseExceptionGroup):
+        assert exc_info.group_contains(TypeMisMatch)
+        exc_group = exc_info.value.subgroup(TypeMisMatch)
+        e = exc_group.exceptions[0] if exc_group else None
+        assert isinstance(e, TypeMisMatch)
+    else:
+        e = exc_info.value
+
+    assert e.param.name == "event"
+    assert e.value is event
 
 
 @pytest.mark.asyncio
