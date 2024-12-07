@@ -72,8 +72,8 @@ class DriverMixin(BaseApp):
         if asgi is None:
             client = get_global_client()
 
-        asgi = asgi or nonebot.get_asgi()
-        return ServerContext(self, asgi=asgi, client=client)
+        _asgi = asgi or nonebot.get_asgi()
+        return ServerContext(self, asgi=_asgi, client=client)
 
     # def test_client(self):
     #     ...

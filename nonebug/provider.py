@@ -75,8 +75,8 @@ class NoneBugProvider(MatcherProvider):  # pragma: no cover
     def clear(self) -> None:
         self._matchers.clear()
 
-    def update(self, __m: MutableMapping[int, list[type["Matcher"]]]) -> None:  # type: ignore
-        self._matchers.update(__m)
+    def update(self, m: MutableMapping[int, list[type["Matcher"]]], /) -> None:  # type: ignore
+        self._matchers.update(m)
 
     def setdefault(
         self, key: int, default: list[type["Matcher"]]
