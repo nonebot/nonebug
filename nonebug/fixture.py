@@ -1,4 +1,4 @@
-from contextlib import nullcontext, asynccontextmanager
+from contextlib import asynccontextmanager
 
 import pytest
 from async_asgi_testclient import TestClient
@@ -7,6 +7,11 @@ from nonebug.app import App
 from nonebug.mixin.driver import set_global_client
 
 from . import NONEBOT_INIT_KWARGS, NONEBOT_START_LIFESPAN
+
+
+@asynccontextmanager
+async def nullcontext():
+    yield
 
 
 @asynccontextmanager
