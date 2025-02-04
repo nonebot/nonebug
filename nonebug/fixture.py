@@ -34,8 +34,7 @@ async def lifespan_ctx():
         await ctx.__aenter__()
     except Exception as e:
         logger.opt(colors=True, exception=e).error(
-            "<r><bg #f8bbd0>Error occurred while running startup hook."
-            "</bg #f8bbd0></r>"
+            "<r><bg #f8bbd0>Error occurred while running startup hook.</bg #f8bbd0></r>"
         )
         raise
 
