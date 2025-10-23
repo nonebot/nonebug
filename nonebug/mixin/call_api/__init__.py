@@ -106,7 +106,9 @@ class ApiContext(Context):
         self, monkeypatch: pytest.MonkeyPatch, adapter: "Adapter"
     ) -> None:
         new_adapter = self.create_adapter()
-        monkeypatch.setattr(adapter, "_call_api", getattr(new_adapter, "_call_api"))
+        monkeypatch.setattr(
+            adapter.__class__, "_call_api", getattr(new_adapter.__class__, "_call_api")
+        )
 
     def patch_bot(self, monkeypatch: pytest.MonkeyPatch, bot: "Bot") -> None:
         new_bot = self.create_bot(auto_connect=False)
