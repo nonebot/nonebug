@@ -6,10 +6,6 @@ inputs:
     description: Python version
     required: false
     default: "3.12"
-  env-group:
-    description: Environment group
-    required: false
-    default: "pydantic-v2"
 
 runs:
   using: "composite"
@@ -17,8 +13,6 @@ runs:
     - uses: astral-sh/setup-uv@v7
       with:
         python-version: ${{ inputs.python-version }}
-        cache-suffix: ${{ inputs.env-group }}
 
-    - run: |
-        uv sync --all-extras --locked --group ${{ inputs.env-group }}
+    - run: uv sync --locked
       shell: bash

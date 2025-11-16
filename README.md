@@ -47,9 +47,9 @@ _✨ NoneBot2 测试框架 ✨_
 本工具为 [pytest](https://docs.pytest.org/en/stable/) 插件，需要配合 pytest 异步插件使用。
 
 ```bash
-uv add nonebug pytest-asyncio -G test
+uv add nonebug pytest-asyncio --group test
 # 或者使用 anyio
-uv add nonebug anyio -G test
+uv add nonebug anyio --group test
 ```
 
 ```bash

@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Run Pytest and Upload Coverage
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Setup Python environment
         uses: ./.github/actions/setup-python

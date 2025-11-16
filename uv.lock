@@ -641,7 +641,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "nonemoji", specifier = ">=0.1.3" },
+    { name = "nonemoji", specifier = ">=0.1.4" },
     { name = "pre-commit", specifier = ">=4.4.0" },
     { name = "ruff", specifier = ">=0.14.5,<0.15.0" },
 ]

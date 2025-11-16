@@ -23,9 +23,12 @@ documentation = "https://nonebot.dev/"
 homepage = "https://nonebot.dev/"
 repository = "https://github.com/nonebot/nonebug"
 
+[project.entry-points.pytest11]
+nonebug = "nonebug.fixture"
+
 [dependency-groups]
 dev = [
-  "nonemoji >=0.1.3",
+  "nonemoji >=0.1.4",
   "pre-commit >=4.4.0",
   "ruff >=0.14.5, <0.15.0",
 ]
@@ -61,24 +64,20 @@ pythonVersion = "3.10"
 pythonPlatform = "All"
 executionEnvironments = [
   { root = "./tests", extraPaths = [
-    "./",
+    "./src",
   ] },
-  { root = "./" },
+  { root = "./src" },
 ]
 
 [tool.pytest]
-asyncio_mode = "auto"
 addopts = [
-  "--cov",
-  "nonebug",
-  "--cov-report",
-  "term-missing",
-  "-p",
-  "no:nonebug"
+  "--cov", "nonebug",
+  "--cov-report", "term-missing",
+  "-p", "no:nonebug",
 ]
-
-[tool.pytest11]
-nonebug = "nonebug.fixture"
+minversion = "9.0"
+pythonpath = ["src"]
+asyncio_mode = "auto"
 
 [tool.ruff]
 line-length = 88

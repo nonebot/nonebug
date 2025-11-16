@@ -20,3 +20,4 @@ repos:
     hooks:
       - id: nonemoji
         stages: [prepare-commit-msg]
+        language_version: "3.12"

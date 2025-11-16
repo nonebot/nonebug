@@ -6,7 +6,7 @@ from nonebug import App
 
 @pytest.mark.asyncio
 async def test_process(app: App):
-    from tests.plugins.process import (
+    from plugins.process import (
         test,
         test_ignore,
         test_not_pass_perm,
@@ -70,7 +70,7 @@ async def test_process(app: App):
 @pytest.mark.asyncio
 @pytest.mark.xfail(strict=True)
 async def test_error(app: App):
-    from tests.plugins.process import test_error
+    from plugins.process import test_error
 
     async with app.test_matcher(test_error) as ctx:
         adapter = ctx.create_adapter()
