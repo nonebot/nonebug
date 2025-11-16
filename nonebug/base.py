@@ -1,5 +1,4 @@
 import contextlib
-from typing import Optional
 from typing_extensions import Self
 
 
@@ -37,7 +36,7 @@ class BaseApp:
 
         from .provider import NoneBugProvider
 
-        self.context: Optional[Context] = None
+        self.context: Context | None = None
         if not isinstance(matchers.provider, NoneBugProvider):  # pragma: no cover
             raise RuntimeError("NoneBug is not initialized")
         self.provider = matchers.provider

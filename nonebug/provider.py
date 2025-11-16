@@ -1,7 +1,7 @@
 from copy import deepcopy
 from collections import defaultdict
 from contextlib import contextmanager
-from typing import Union, TypeVar, Optional, overload
+from typing import TypeVar, overload
 from collections.abc import (
     Mapping,
     Iterator,
@@ -56,14 +56,14 @@ class NoneBugProvider(MatcherProvider):  # pragma: no cover
         return self._matchers.items()
 
     @overload
-    def get(self, key: int) -> Optional[list[type["Matcher"]]]: ...
+    def get(self, key: int) -> list[type["Matcher"]] | None: ...
 
     @overload
-    def get(self, key: int, default: T) -> Union[list[type["Matcher"]], T]: ...
+    def get(self, key: int, default: T) -> list[type["Matcher"]] | T: ...
 
     def get(
-        self, key: int, default: Optional[T] = None
-    ) -> Optional[Union[list[type["Matcher"]], T]]:
+        self, key: int, default: T | None = None
+    ) -> list[type["Matcher"]] | T | None:
         return self._matchers.get(key, default)
 
     def pop(self, key: int) -> list[type["Matcher"]]:  # type: ignore
@@ -84,7 +84,7 @@ class NoneBugProvider(MatcherProvider):  # pragma: no cover
         return self._matchers.setdefault(key, default)
 
     @contextmanager
-    def context(self, matchers: Optional[Mapping[int, list[type[Matcher]]]] = None):
+    def context(self, matchers: Mapping[int, list[type[Matcher]]] | None = None):
         self._stack.append(self._matchers)
         self._matchers = (
             deepcopy(self._matchers)

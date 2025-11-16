@@ -1,5 +1,5 @@
 from typing_extensions import override
-from typing import TYPE_CHECKING, Any, Union, TypeVar, Optional, overload
+from typing import TYPE_CHECKING, Any, Union, TypeVar, overload
 
 if TYPE_CHECKING:
     from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
@@ -19,9 +19,7 @@ def make_fake_adapter(ctx: "ApiContext", base: A) -> A: ...
 
 
 # fake class should be created every init
-def make_fake_adapter(
-    ctx: "ApiContext", base: Optional[A] = None
-) -> Union[A, type["Adapter"]]:
+def make_fake_adapter(ctx: "ApiContext", base: A | None = None) -> A | type["Adapter"]:
     from nonebot.adapters import Adapter
 
     _base = base or Adapter
@@ -47,7 +45,7 @@ def make_fake_bot(ctx: "ApiContext", base: None = None) -> type["Bot"]: ...
 def make_fake_bot(ctx: "ApiContext", base: B) -> B: ...
 
 
-def make_fake_bot(ctx: "ApiContext", base: Optional[B] = None) -> Union[B, type["Bot"]]:
+def make_fake_bot(ctx: "ApiContext", base: B | None = None) -> B | type["Bot"]:
     from nonebot.adapters import Bot
 
     _base = base or Bot

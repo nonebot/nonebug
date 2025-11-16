@@ -1,5 +1,3 @@
-from typing import Union
-
 import pytest
 import nonebot
 from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
@@ -14,7 +12,7 @@ async def test_driver(app: App):
         async def send(
             self,
             event: Event,
-            message: Union[str, Message, MessageSegment],
+            message: str | Message | MessageSegment,
             **kwargs,
         ):
             raise NotImplementedError

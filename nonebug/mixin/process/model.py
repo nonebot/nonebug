@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Union, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar
 
 from _pytest.outcomes import OutcomeException
 
@@ -20,7 +20,7 @@ class ReceiveEvent(Model):
 
 @dataclass
 class Action(Model):
-    matcher: Optional[type["Matcher"]] = None
+    matcher: type["Matcher"] | None = None
 
 
 @dataclass
@@ -37,7 +37,7 @@ class Finished(Action): ...
 
 @dataclass
 class Check(Model):
-    matcher: Optional[type["Matcher"]] = None
+    matcher: type["Matcher"] | None = None
 
     _priority: ClassVar[int]
 
@@ -79,4 +79,4 @@ class IgnorePermission(Check):
 @dataclass
 class Error:
     matcher: type["Matcher"]
-    error: Union[Exception, OutcomeException]
+    error: Exception | OutcomeException

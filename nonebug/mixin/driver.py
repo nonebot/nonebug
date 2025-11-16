@@ -1,4 +1,3 @@
-from typing import Optional
 from typing_extensions import final
 
 from asgiref.typing import ASGIApplication
@@ -6,7 +5,7 @@ from async_asgi_testclient import TestClient
 
 from nonebug.base import BaseApp, Context
 
-_global_client: Optional[TestClient] = None
+_global_client: TestClient | None = None
 
 
 def set_global_client(client: TestClient):
@@ -18,7 +17,7 @@ def set_global_client(client: TestClient):
     _global_client = client
 
 
-def get_global_client() -> Optional[TestClient]:
+def get_global_client() -> TestClient | None:
     return _global_client
 
 
@@ -29,7 +28,7 @@ class ServerContext(Context):
         app: BaseApp,
         *args,
         asgi: ASGIApplication,
-        client: Optional[TestClient] = None,
+        client: TestClient | None = None,
         **kwargs,
     ):
         super().__init__(app, *args, **kwargs)
@@ -65,7 +64,7 @@ class ServerContext(Context):
 
 
 class DriverMixin(BaseApp):
-    def test_server(self, asgi: Optional[ASGIApplication] = None) -> ServerContext:
+    def test_server(self, asgi: ASGIApplication | None = None) -> ServerContext:
         import nonebot
 
         client = None
