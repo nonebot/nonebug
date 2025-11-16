@@ -29,7 +29,7 @@ jobs:
         run: exit 1
 
       - name: Build Package
-        run: poetry build
+        run: uv build
 
       - name: Publish Package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
