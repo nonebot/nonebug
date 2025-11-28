@@ -1,8 +1,7 @@
-from typing_extensions import final
-from collections.abc import Iterable
-from contextlib import AsyncExitStack
 from typing import TYPE_CHECKING, Any, Union
-from collections.abc import Callable
+from contextlib import AsyncExitStack
+from collections.abc import Callable, Iterable
+from typing_extensions import final
 
 import pytest
 

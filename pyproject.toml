@@ -3,7 +3,7 @@ name = "nonebug"
 version = "0.4.3"
 description = "nonebot2 test framework"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10, <4.0"
 license = "MIT"
 authors = [
   { name = "AkiraXie", email = "l997460364@outlook.com" },
@@ -12,10 +12,10 @@ authors = [
 keywords = ["bot", "cqhttp", "nonebot", "onebot", "pytest", "test"]
 classifiers = ["Framework :: Pytest"]
 dependencies = [
-  "asgiref >=3.10.0",
-  "async-asgi-testclient >=1.4.8",
-  "nonebot2 >=2.3.0",
-  "pytest >=9.0.1"
+  "asgiref >=3.10.0, <4.0.0",
+  "async-asgi-testclient >=1.4.8, <2.0.0",
+  "nonebot2 >=2.3.0, <3.0.0",
+  "pytest >=9.0.1, <10.0.0"
 ]
 
 [project.urls]
@@ -28,14 +28,14 @@ nonebug = "nonebug.fixture"
 
 [dependency-groups]
 dev = [
-  "nonemoji >=0.1.4",
-  "pre-commit >=4.4.0",
-  "ruff >=0.14.5, <0.15.0",
+  "nonemoji >=0.1.4, <1.0.0",
+  "pre-commit >=4.5.0, <5.0.0",
+  "ruff >=0.14.6, <0.15.0",
 ]
 test = [
-  "nonebot2[fastapi] >=2.3.0",
-  "pytest-asyncio >=1.3.0",
-  "pytest-cov >=7.0.0"
+  "nonebot2[fastapi] >=2.3.0, <3.0.0",
+  "pytest-asyncio >=1.3.0, <2.0.0",
+  "pytest-cov >=7.0.0, <8.0.0"
 ]
 
 [build-system]
@@ -64,24 +64,24 @@ pythonVersion = "3.10"
 pythonPlatform = "All"
 executionEnvironments = [
   { root = "./tests", extraPaths = [
-    "./src",
+    "./",
   ] },
-  { root = "./src" },
+  { root = "./" },
 ]
 
 [tool.pytest]
 addopts = [
-  "--cov", "nonebug",
-  "--cov-report", "term-missing",
-  "-p", "no:nonebug",
+  "--cov",
+  "nonebug",
+  "--cov-report",
+  "term-missing",
+  "-p",
+  "no:nonebug",
 ]
-minversion = "9.0"
-pythonpath = ["src"]
 asyncio_mode = "auto"
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
 
 [tool.ruff.format]
 line-ending = "lf"
@@ -109,8 +109,6 @@ ignore = [
   "RUF001",  # ambiguous-unicode-character-string
   "RUF002",  # ambiguous-unicode-character-docstring
   "RUF003",  # ambiguous-unicode-character-comment
-  "W191",  # indentation contains tabs
-  "I001",  # isort: imports are incorrectly sorted
 ]
 
 [tool.ruff.lint.isort]
@@ -128,3 +126,7 @@ keep-runtime-typing = true
 [tool.uv]
 required-version = ">=0.9.0"
 default-groups = ["test", "dev"]
+
+[tool.uv.build-backend]
+module-name = "nonebug"
+module-root = ""

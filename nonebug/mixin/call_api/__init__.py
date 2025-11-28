@@ -1,13 +1,13 @@
-import contextlib
 from queue import Queue
 from typing import TYPE_CHECKING, Any, Union, TypeVar, Optional, overload
+import contextlib
 
 import pytest
 
 from nonebug.base import BaseApp, Context
 
-from .model import Api, Send, Model
 from .fake import make_fake_bot, make_fake_adapter
+from .model import Api, Send, Model
 
 if TYPE_CHECKING:
     from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment

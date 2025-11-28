@@ -1,8 +1,8 @@
-from contextvars import ContextVar
-from collections import defaultdict
-from typing_extensions import final
-from contextlib import contextmanager
 from typing import TYPE_CHECKING, Literal, TypedDict
+from contextlib import contextmanager
+from collections import defaultdict
+from contextvars import ContextVar
+from typing_extensions import final
 
 import pytest
 from _pytest.outcomes import Skipped

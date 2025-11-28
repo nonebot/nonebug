@@ -7,12 +7,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Run Pytest and Upload Coverage
+    name: Test Coverage
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup Python environment
         uses: ./.github/actions/setup-python
+        with:
+          python-version: ${{ matrix.python-version }}
 
       - name: Run Pytest
         run: uv run pytest --cov-report xml

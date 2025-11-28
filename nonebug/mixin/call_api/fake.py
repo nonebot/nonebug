@@ -1,5 +1,5 @@
-from typing_extensions import override
 from typing import TYPE_CHECKING, Any, Union, TypeVar, overload
+from typing_extensions import override
 
 if TYPE_CHECKING:
     from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment

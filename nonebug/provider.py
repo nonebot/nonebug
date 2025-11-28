@@ -1,7 +1,7 @@
 from copy import deepcopy
-from collections import defaultdict
-from contextlib import contextmanager
 from typing import TypeVar, overload
+from contextlib import contextmanager
+from collections import defaultdict
 from collections.abc import (
     Mapping,
     Iterator,

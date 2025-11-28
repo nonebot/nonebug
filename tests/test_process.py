@@ -1,5 +1,5 @@
-import pytest
 from utils import make_fake_event, make_fake_message
+import pytest
 
 from nonebug import App
 

@@ -1,7 +1,7 @@
 import pytest
 import nonebot
-from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
 from nonebot.drivers import URL, Driver, Request, Response, HTTPServerSetup
+from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
 
 from nonebug import App
 

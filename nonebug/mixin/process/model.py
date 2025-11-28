@@ -1,5 +1,5 @@
-from dataclasses import dataclass
 from typing import TYPE_CHECKING, ClassVar
+from dataclasses import dataclass
 
 from _pytest.outcomes import OutcomeException
 
