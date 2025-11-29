@@ -1,3 +1,4 @@
+from typing import Union, Optional
 from collections.abc import Mapping, Iterable
 
 from pydantic import create_model
@@ -41,7 +42,7 @@ def make_fake_message():
             return FakeMessageSegment
 
         @staticmethod
-        def _construct(msg: str | Iterable[Mapping]):
+        def _construct(msg: Union[str, Iterable[Mapping]]):
             if isinstance(msg, str):
                 yield FakeMessageSegment.text(msg)
             else:
@@ -57,13 +58,13 @@ def make_fake_message():
 
 
 def make_fake_event(
-    _base: type[Event] | None = None,
+    _base: Optional[type[Event]] = None,
     _type: str = "message",
     _name: str = "test",
     _description: str = "test",
-    _user_id: str | None = "test",
-    _session_id: str | None = "test",
-    _message: Message | None = None,
+    _user_id: Optional[str] = "test",
+    _session_id: Optional[str] = "test",
+    _message: Optional[Message] = None,
     _to_me: bool = True,
     **fields,
 ) -> type[Event]:

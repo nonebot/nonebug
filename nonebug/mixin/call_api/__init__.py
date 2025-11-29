@@ -51,14 +51,14 @@ class ApiContext(Context):
     def create_adapter(
         self,
         *,
-        base: type[A] | None = None,
+        base: Optional[type[A]] = None,
         **kwargs: Any,
     ) -> A: ...
 
     def create_adapter(
         self,
         *,
-        base: type[A] | None = None,
+        base: Optional[type[A]] = None,
         **kwargs: Any,
     ) -> Union[A, "Adapter"]:
         from nonebot import get_driver
@@ -80,7 +80,7 @@ class ApiContext(Context):
     def create_bot(
         self,
         *,
-        base: type[B] | None = None,
+        base: Optional[type[B]] = None,
         adapter: Optional["Adapter"] = None,
         self_id: str = "test",
         auto_connect: bool = True,
@@ -90,7 +90,7 @@ class ApiContext(Context):
     def create_bot(
         self,
         *,
-        base: type[B] | None = None,
+        base: Optional[type[B]] = None,
         adapter: Optional["Adapter"] = None,
         self_id: str = "test",
         auto_connect: bool = True,
@@ -116,8 +116,8 @@ class ApiContext(Context):
         self,
         api: str,
         data: dict[str, Any],
-        result: Any | None = None,
-        exception: Exception | None = None,
+        result: Optional[Any] = None,
+        exception: Optional[Exception] = None,
         adapter: Optional["Adapter"] = None,
     ) -> Api:
         model = Api(
@@ -130,8 +130,8 @@ class ApiContext(Context):
         self,
         event: "Event",
         message: Union[str, "Message", "MessageSegment"],
-        result: Any | None = None,
-        exception: Exception | None = None,
+        result: Optional[Any] = None,
+        exception: Optional[Exception] = None,
         bot: Optional["Bot"] = None,
         **kwargs: Any,
     ) -> Send:

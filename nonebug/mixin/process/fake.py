@@ -1,5 +1,5 @@
-from typing import TYPE_CHECKING
-from collections.abc import Callable, Awaitable
+from typing import TYPE_CHECKING, Callable
+from collections.abc import Awaitable
 from typing_extensions import ParamSpec
 
 from _pytest.outcomes import OutcomeException

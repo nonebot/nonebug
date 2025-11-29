@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Literal, TypedDict
+from typing import TYPE_CHECKING, Union, Literal, Optional, TypedDict
 from contextlib import contextmanager
 from collections import defaultdict
 from contextvars import ContextVar
@@ -58,7 +58,7 @@ class MatcherContext(ApiContext):
         self,
         app: "ProcessMixin",
         *args,
-        matchers: dict[int, list[type["Matcher"]]] | None,
+        matchers: Optional[dict[int, list[type["Matcher"]]]],
         **kwargs,
     ):
         super().__init__(app, *args, **kwargs)
@@ -77,19 +77,21 @@ class MatcherContext(ApiContext):
         self.event_list.append((receive_event, EventTest(checks=[], actions=[])))
         return receive_event
 
-    def should_pass_rule(self, matcher: type["Matcher"] | None = None) -> RulePass:
+    def should_pass_rule(self, matcher: Optional[type["Matcher"]] = None) -> RulePass:
         rule = RulePass(matcher=matcher)
         self.currect_event_test["checks"].append(rule)
         return rule
 
     def should_not_pass_rule(
-        self, matcher: type["Matcher"] | None = None
+        self, matcher: Optional[type["Matcher"]] = None
     ) -> RuleNotPass:
         rule = RuleNotPass(matcher=matcher)
         self.currect_event_test["checks"].append(rule)
         return rule
 
-    def should_ignore_rule(self, matcher: type["Matcher"] | None = None) -> IgnoreRule:
+    def should_ignore_rule(
+        self, matcher: Optional[type["Matcher"]] = None
+    ) -> IgnoreRule:
         rule = IgnoreRule(matcher=matcher)
         self.currect_event_test["checks"].append(rule)
         return rule
@@ -123,21 +125,21 @@ class MatcherContext(ApiContext):
         return result
 
     def should_pass_permission(
-        self, matcher: type["Matcher"] | None = None
+        self, matcher: Optional[type["Matcher"]] = None
     ) -> PermissionPass:
         permission = PermissionPass(matcher=matcher)
         self.currect_event_test["checks"].append(permission)
         return permission
 
     def should_not_pass_permission(
-        self, matcher: type["Matcher"] | None = None
+        self, matcher: Optional[type["Matcher"]] = None
     ) -> PermissionNotPass:
         permission = PermissionNotPass(matcher=matcher)
         self.currect_event_test["checks"].append(permission)
         return permission
 
     def should_ignore_permission(
-        self, matcher: type["Matcher"] | None = None
+        self, matcher: Optional[type["Matcher"]] = None
     ) -> IgnorePermission:
         permission = IgnorePermission(matcher=matcher)
         self.currect_event_test["checks"].append(permission)
@@ -173,7 +175,7 @@ class MatcherContext(ApiContext):
                 break
         return result
 
-    def should_paused(self, matcher: type["Matcher"] | None = None) -> Paused:
+    def should_paused(self, matcher: Optional[type["Matcher"]] = None) -> Paused:
         if any(
             action.matcher is matcher for action in self.currect_event_test["actions"]
         ):
@@ -182,7 +184,7 @@ class MatcherContext(ApiContext):
         self.currect_event_test["actions"].append(paused)
         return paused
 
-    def should_rejected(self, matcher: type["Matcher"] | None = None) -> Rejected:
+    def should_rejected(self, matcher: Optional[type["Matcher"]] = None) -> Rejected:
         if any(
             action.matcher is matcher for action in self.currect_event_test["actions"]
         ):
@@ -191,7 +193,7 @@ class MatcherContext(ApiContext):
         self.currect_event_test["actions"].append(rejected)
         return rejected
 
-    def should_finished(self, matcher: type["Matcher"] | None = None) -> Finished:
+    def should_finished(self, matcher: Optional[type["Matcher"]] = None) -> Finished:
         if any(
             action.matcher is matcher for action in self.currect_event_test["actions"]
         ):
@@ -285,13 +287,15 @@ class MatcherContext(ApiContext):
 class ProcessMixin(BaseApp):
     def test_matcher(
         self,
-        m: None
-        | type["Matcher"]
-        | list[type["Matcher"]]
-        | dict[int, list[type["Matcher"]]] = None,
+        m: Union[
+            None,
+            type["Matcher"],
+            list[type["Matcher"]],
+            dict[int, list[type["Matcher"]]],
+        ] = None,
         /,
     ) -> MatcherContext:
-        matchers: dict[int, list[type["Matcher"]]] | None
+        matchers: Optional[dict[int, list[type["Matcher"]]]]
         if m is None:
             matchers = None
         elif isinstance(m, list):

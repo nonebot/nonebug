@@ -1,6 +1,6 @@
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any, Union, Callable, Optional
 from contextlib import AsyncExitStack
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
 from typing_extensions import final
 
 import pytest
@@ -51,8 +51,8 @@ class DependentMixin(BaseApp):
     def test_dependent(
         self,
         dependent: Union["Dependent", Callable[..., Any]],
-        allow_types: Iterable[type["Param"]] | None = None,
-        parameterless: Iterable[Any] | None = None,
+        allow_types: Optional[Iterable[type["Param"]]] = None,
+        parameterless: Optional[Iterable[Any]] = None,
     ) -> DependentContext:
         from nonebot.dependencies import Dependent
 
