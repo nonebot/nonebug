@@ -8,15 +8,13 @@ from nonebug import App
 async def test_process(app: App):
     from plugins.process import (
         test,
-        test_ignore,
         test_not_pass_perm,
         test_not_pass_rule,
     )
 
     Message = make_fake_message()
 
-    # test
-    async with app.test_matcher() as ctx:
+    async with app.test_matcher([test, test_not_pass_perm, test_not_pass_rule]) as ctx:
         adapter = ctx.create_adapter()
         bot = ctx.create_bot(adapter=adapter)
 
@@ -43,7 +41,13 @@ async def test_process(app: App):
 
         ctx.should_rejected(matcher=test)
 
-    # test ignore
+
+@pytest.mark.asyncio
+async def test_ignore(app: App):
+    from plugins.process import test_ignore
+
+    Message = make_fake_message()
+
     async with app.test_matcher(test_ignore) as ctx:
         adapter = ctx.create_adapter()
         bot = ctx.create_bot(adapter=adapter)
