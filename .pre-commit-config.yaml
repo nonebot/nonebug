@@ -10,7 +10,7 @@ repos:
     rev: v0.14.6
     hooks:
       - id: ruff-check
-        args: [--fix]
+        args: [--fix, --exit-non-zero-on-fix]
         stages: [pre-commit]
       - id: ruff-format
         stages: [pre-commit]
@@ -20,4 +20,3 @@ repos:
     hooks:
       - id: nonemoji
         stages: [prepare-commit-msg]
-        language_version: "3.12"

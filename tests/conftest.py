@@ -1,11 +1,11 @@
 from pathlib import Path
 
-import pytest
 import nonebot
 from nonebot.plugin import Plugin
+import pytest
 
 from nonebug import NONEBOT_INIT_KWARGS
-from nonebug.fixture import nonebug_app, nonebug_init, _nonebot_init  # noqa: F401
+from nonebug.fixture import _nonebot_init, nonebug_app, nonebug_init  # noqa: F401
 
 
 def pytest_configure(config: pytest.Config) -> None:

@@ -1,7 +1,7 @@
-from utils import make_fake_event
-import pytest
 from nonebot import get_bot, get_bots
-from nonebot.adapters import Bot, Adapter
+from nonebot.adapters import Adapter, Bot
+import pytest
+from utils import make_fake_event
 
 from nonebug import App
 

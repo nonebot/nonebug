@@ -7,7 +7,7 @@ requires-python = ">=3.9, <4.0"
 license = "MIT"
 authors = [
   { name = "AkiraXie", email = "l997460364@outlook.com" },
-  { name = "yanyongyu", email = "yyy@nonebot.dev" }
+  { name = "yanyongyu", email = "yyy@nonebot.dev" },
 ]
 keywords = ["bot", "cqhttp", "nonebot", "onebot", "pytest", "test"]
 classifiers = ["Framework :: Pytest"]
@@ -15,7 +15,7 @@ dependencies = [
   "asgiref >=3.8.0, <4.0.0",
   "async-asgi-testclient >=1.4.8, <2.0.0",
   "nonebot2 >=2.3.0, <3.0.0",
-  "pytest >=7.0.0, <10.0.0"
+  "pytest >=7.0.0, <10.0.0",
 ]
 
 [project.urls]
@@ -31,16 +31,21 @@ dev = [
   "nonemoji >=0.1.4, <1.0.0",
   "pre-commit >=4.3.0, <5.0.0",
   "ruff >=0.14.6, <0.15.0",
+  { include-group = "test" },
 ]
 test = [
   "nonebot2[fastapi] >=2.3.0, <3.0.0",
   "pytest-asyncio >=1.1.0, <2.0.0",
-  "pytest-cov >=7.0.0, <8.0.0"
+  "pytest-cov >=7.0.0, <8.0.0",
 ]
 
 [build-system]
 requires = ["uv_build >=0.9.0, <0.10.0"]
 build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "nonebug"
+module-root = ""
 
 [tool.coverage.report]
 exclude_lines = [
@@ -62,12 +67,6 @@ reportPrivateImportUsage = false
 disableBytesTypePromotions = true
 pythonVersion = "3.10"
 pythonPlatform = "All"
-executionEnvironments = [
-  { root = "./tests", extraPaths = [
-    "./",
-  ] },
-  { root = "./" },
-]
 
 [tool.pytest]
 addopts = [
@@ -88,31 +87,31 @@ line-ending = "lf"
 
 [tool.ruff.lint]
 select = [
-  "F",  # Pyflakes
-  "W",  # pycodestyle warnings
-  "E",  # pycodestyle errors
-  "I",  # isort
-  "UP",  # pyupgrade
-  "ASYNC",  # flake8-async
-  "C4",  # flake8-comprehensions
-  "T10",  # flake8-debugger
-  "T20",  # flake8-print
-  "PYI",  # flake8-pyi
-  "PT",  # flake8-pytest-style
-  "Q",  # flake8-quotes
-  "TID",  # flake8-tidy-imports
-  "RUF",  # Ruff-specific rules
+  "F",     # Pyflakes
+  "W",     # pycodestyle warnings
+  "E",     # pycodestyle errors
+  "I",     # isort
+  "UP",    # pyupgrade
+  "ASYNC", # flake8-async
+  "C4",    # flake8-comprehensions
+  "T10",   # flake8-debugger
+  "T20",   # flake8-print
+  "PYI",   # flake8-pyi
+  "PT",    # flake8-pytest-style
+  "Q",     # flake8-quotes
+  "TID",   # flake8-tidy-imports
+  "RUF",   # Ruff-specific rules
 ]
+
 ignore = [
-  "E402",  # module-import-not-at-top-of-file
+  "E402",   # module-import-not-at-top-of-file
   "UP037",  # quoted-annotation
-  "RUF001",  # ambiguous-unicode-character-string
-  "RUF002",  # ambiguous-unicode-character-docstring
-  "RUF003",  # ambiguous-unicode-character-comment
+  "RUF001", # ambiguous-unicode-character-string
+  "RUF002", # ambiguous-unicode-character-docstring
+  "RUF003", # ambiguous-unicode-character-comment
 ]
 
 [tool.ruff.lint.isort]
-length-sort = true
 force-sort-within-sections = true
 extra-standard-library = ["typing_extensions"]
 
@@ -122,11 +121,3 @@ mark-parentheses = false
 
 [tool.ruff.lint.pyupgrade]
 keep-runtime-typing = true
-
-[tool.uv]
-required-version = ">=0.9.0"
-default-groups = ["test", "dev"]
-
-[tool.uv.build-backend]
-module-name = "nonebug"
-module-root = ""

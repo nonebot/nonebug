@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 
-import pytest
 from async_asgi_testclient import TestClient
+import pytest
 
 from nonebug.app import App
 from nonebug.mixin.driver import set_global_client

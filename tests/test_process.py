@@ -1,12 +1,12 @@
-from utils import make_fake_event, make_fake_message
 import pytest
+from utils import make_fake_event, make_fake_message
 
 from nonebug import App
 
 
 @pytest.mark.asyncio
 async def test_process(app: App):
-    from plugins.process import (
+    from tests.plugins.process import (
         test,
         test_not_pass_perm,
         test_not_pass_rule,
@@ -44,7 +44,7 @@ async def test_process(app: App):
 
 @pytest.mark.asyncio
 async def test_ignore(app: App):
-    from plugins.process import test_ignore
+    from tests.plugins.process import test_ignore
 
     Message = make_fake_message()
 
@@ -74,7 +74,7 @@ async def test_ignore(app: App):
 @pytest.mark.asyncio
 @pytest.mark.xfail(strict=True)
 async def test_error(app: App):
-    from plugins.process import test_error
+    from tests.plugins.process import test_error
 
     async with app.test_matcher(test_error) as ctx:
         adapter = ctx.create_adapter()

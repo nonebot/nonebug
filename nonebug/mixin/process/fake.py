@@ -1,5 +1,5 @@
-from typing import TYPE_CHECKING, Callable
 from collections.abc import Awaitable
+from typing import TYPE_CHECKING, Callable
 from typing_extensions import ParamSpec
 
 from _pytest.outcomes import OutcomeException
@@ -53,8 +53,8 @@ def make_fake_simple_run(
 
     async def fake_simple_run(self: "Matcher", *args, **kwargs) -> None:
         from nonebot.exception import (
-            PausedException,
             FinishedException,
+            PausedException,
             RejectedException,
         )
 

@@ -1,8 +1,8 @@
-from typing import Union, Optional
-from collections.abc import Mapping, Iterable
+from collections.abc import Iterable, Mapping
+from typing import Optional, Union
 
-from pydantic import create_model
 from nonebot.adapters import Event, Message, MessageSegment
+from pydantic import create_model
 
 
 def escape_text(s: str, *, escape_comma: bool = True) -> str:

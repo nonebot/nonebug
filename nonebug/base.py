@@ -1,5 +1,5 @@
-from typing import Optional
 import contextlib
+from typing import Optional
 from typing_extensions import Self
 
 

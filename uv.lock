@@ -837,9 +837,13 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "nonebot2", extra = ["fastapi"] },
     { name = "nonemoji" },
     { name = "pre-commit", version = "4.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "pre-commit", version = "4.5.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pytest-asyncio", version = "1.2.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "pytest-asyncio", version = "1.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "pytest-cov" },
     { name = "ruff" },
 ]
 test = [
@@ -859,8 +863,11 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "nonebot2", extras = ["fastapi"], specifier = ">=2.3.0,<3.0.0" },
     { name = "nonemoji", specifier = ">=0.1.4,<1.0.0" },
     { name = "pre-commit", specifier = ">=4.3.0,<5.0.0" },
+    { name = "pytest-asyncio", specifier = ">=1.1.0,<2.0.0" },
+    { name = "pytest-cov", specifier = ">=7.0.0,<8.0.0" },
     { name = "ruff", specifier = ">=0.14.6,<0.15.0" },
 ]
 test = [

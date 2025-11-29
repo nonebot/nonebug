@@ -1,9 +1,9 @@
-from utils import make_fake_event
-import pytest
 from exceptiongroup import BaseExceptionGroup
-from nonebot.params import EventParam
 from nonebot.adapters import Event
 from nonebot.exception import TypeMisMatch
+from nonebot.params import EventParam
+import pytest
+from utils import make_fake_event
 
 from nonebug import App
 
