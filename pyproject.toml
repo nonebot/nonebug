@@ -68,16 +68,9 @@ disableBytesTypePromotions = true
 pythonVersion = "3.10"
 pythonPlatform = "All"
 
-[tool.pytest]
-addopts = [
-  "--cov",
-  "nonebug",
-  "--cov-report",
-  "term-missing",
-  "-p",
-  "no:nonebug",
-]
+[tool.pytest.ini_options]
 asyncio_mode = "auto"
+addopts = "--cov nonebug --cov-report term-missing -p no:nonebug"
 
 [tool.ruff]
 line-length = 88
