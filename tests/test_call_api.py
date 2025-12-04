@@ -1,9 +1,9 @@
 from nonebot import get_bot, get_bots
 from nonebot.adapters import Adapter, Bot
 import pytest
-from utils import make_fake_event
 
 from nonebug import App
+from tests.utils import make_fake_event
 
 
 @pytest.mark.asyncio

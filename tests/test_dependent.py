@@ -3,9 +3,9 @@ from nonebot.adapters import Event
 from nonebot.exception import TypeMisMatch
 from nonebot.params import EventParam
 import pytest
-from utils import make_fake_event
 
 from nonebug import App
+from tests.utils import make_fake_event
 
 
 @pytest.mark.asyncio

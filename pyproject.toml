@@ -65,7 +65,7 @@ exclude_lines = [
 typeCheckingMode = "standard"
 reportPrivateImportUsage = false
 disableBytesTypePromotions = true
-pythonVersion = "3.10"
+pythonVersion = "3.9"
 pythonPlatform = "All"
 
 [tool.pytest.ini_options]
