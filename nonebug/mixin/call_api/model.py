@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Union, Optional
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 if TYPE_CHECKING:
-    from nonebot.adapters import Bot, Event, Adapter, Message, MessageSegment
+    from nonebot.adapters import Adapter, Bot, Event, Message, MessageSegment
 
 
 @dataclass

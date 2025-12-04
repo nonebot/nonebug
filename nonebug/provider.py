@@ -1,15 +1,15 @@
-from copy import deepcopy
 from collections import defaultdict
-from contextlib import contextmanager
-from typing import Union, TypeVar, Optional, overload
 from collections.abc import (
-    Mapping,
+    ItemsView,
     Iterator,
     KeysView,
-    ItemsView,
-    ValuesView,
+    Mapping,
     MutableMapping,
+    ValuesView,
 )
+from contextlib import contextmanager
+from copy import deepcopy
+from typing import Optional, TypeVar, Union, overload
 
 from nonebot.matcher import Matcher, MatcherProvider
 

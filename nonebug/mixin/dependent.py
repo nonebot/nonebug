@@ -1,7 +1,7 @@
-from typing_extensions import final
 from collections.abc import Iterable
 from contextlib import AsyncExitStack
-from typing import TYPE_CHECKING, Any, Union, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional, Union
+from typing_extensions import final
 
 import pytest
 
@@ -10,7 +10,7 @@ from nonebug.base import BaseApp
 from .call_api import ApiContext
 
 if TYPE_CHECKING:
-    from nonebot.dependencies import Param, Dependent
+    from nonebot.dependencies import Dependent, Param
 
 
 UNSET = object()

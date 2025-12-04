@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Union, ClassVar, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
 from _pytest.outcomes import OutcomeException
 
 if TYPE_CHECKING:
-    from nonebot.matcher import Matcher
     from nonebot.adapters import Bot, Event
+    from nonebot.matcher import Matcher
 
 
 @dataclass

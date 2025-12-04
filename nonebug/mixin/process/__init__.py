@@ -1,34 +1,34 @@
-from contextvars import ContextVar
 from collections import defaultdict
-from typing_extensions import final
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Union, Literal, Optional, TypedDict
+from contextvars import ContextVar
+from typing import TYPE_CHECKING, Literal, Optional, TypedDict, Union
+from typing_extensions import final
 
-import pytest
 from _pytest.outcomes import Skipped
+import pytest
 
 from nonebug.base import BaseApp
 from nonebug.mixin.call_api import ApiContext
 
 from .fake import PATCHES, make_fake_default_state
 from .model import (
-    Check,
     Action,
-    Paused,
+    Check,
     Finished,
-    Rejected,
-    RulePass,
-    IgnoreRule,
-    RuleNotPass,
-    ReceiveEvent,
-    PermissionPass,
     IgnorePermission,
+    IgnoreRule,
+    Paused,
     PermissionNotPass,
+    PermissionPass,
+    ReceiveEvent,
+    Rejected,
+    RuleNotPass,
+    RulePass,
 )
 
 if TYPE_CHECKING:
-    from nonebot.matcher import Matcher
     from nonebot.adapters import Bot, Event
+    from nonebot.matcher import Matcher
 
 event_test_context: ContextVar[tuple[ReceiveEvent, "EventTest"]] = ContextVar(
     "event_test_context"

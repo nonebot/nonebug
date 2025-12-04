@@ -1,7 +1,7 @@
 import pytest
-from utils import make_fake_event, make_fake_message
 
 from nonebug import App
+from tests.utils import make_fake_event, make_fake_message
 
 
 @pytest.mark.asyncio
@@ -15,7 +15,6 @@ async def test_process(app: App):
 
     Message = make_fake_message()
 
-    # test
     async with app.test_matcher() as ctx:
         adapter = ctx.create_adapter()
         bot = ctx.create_bot(adapter=adapter)
@@ -43,7 +42,6 @@ async def test_process(app: App):
 
         ctx.should_rejected(matcher=test)
 
-    # test ignore
     async with app.test_matcher(test_ignore) as ctx:
         adapter = ctx.create_adapter()
         bot = ctx.create_bot(adapter=adapter)

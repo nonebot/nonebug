@@ -1,8 +1,8 @@
-from typing import Union, Optional
-from collections.abc import Mapping, Iterable
+from collections.abc import Iterable, Mapping
+from typing import Optional, Union
 
-from pydantic import create_model
 from nonebot.adapters import Event, Message, MessageSegment
+from pydantic import create_model
 
 
 def escape_text(s: str, *, escape_comma: bool = True) -> str:
@@ -12,7 +12,7 @@ def escape_text(s: str, *, escape_comma: bool = True) -> str:
     return s
 
 
-def make_fake_message():  # noqa: C901
+def make_fake_message():
     class FakeMessageSegment(MessageSegment):
         @classmethod
         def get_message_class(cls):
@@ -57,7 +57,7 @@ def make_fake_message():  # noqa: C901
     return FakeMessage
 
 
-def make_fake_event(  # noqa: C901
+def make_fake_event(
     _base: Optional[type[Event]] = None,
     _type: str = "message",
     _name: str = "test",
